@@ -6,7 +6,6 @@ import scipy
 import seaborn as sns
 import glob
 import random
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
@@ -34,7 +33,7 @@ logger = logging.getLogger(logger_name)
 cmap = plt.cm.Blues
 # Get the colormap colors
 cmap1 = cmap(np.arange(cmap.N))
-# Set alpha (transparency)
+# Set alpha
 cmap1[:,-1] = np.linspace(0, 0.5, cmap.N)
 # Create new colormap
 cmap1 = ListedColormap(cmap1)
@@ -79,8 +78,6 @@ def locations_score_per_cluster(tissue: novosparc.cm.Tissue, cluster_key: str='c
 # %%
 def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
     '''
-    Calculates the marginal distribution of probabilities of cells to be mapped to a visium slice. Cell type dependent. Cells of the same type 
-    get the same prior probability to be mapped. Sums up to 1
     sc_adata=single cell RNA-seq anndata
     ct_col=column in sc_adata.obs indicating cell type
     sample_col=column in sc_adata.obs indicating the sample cells belong to
@@ -119,10 +116,6 @@ def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, n
 
 def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
     '''
-    Calculates the marginal distribution of probabilities of cells to be mapped to a visium slice. Sample dependent. In cases where a dataset with cells from 
-     different slices are present and matching sc/snRNA-seq data is available, cells from the matching slice from the same type 
-    get the same prior probability to be mapped based on sample specific cell type proportions. Other cells get a probability based on the total proportion of cells belonging to the slice. 
-    Sums up to 1, the probabilities for cells from the mapped visium slice sum up to p
     sc_adata=single cell RNA-seq anndata
     ct_col=column in sc_adata.obs indicating cell type
     sample_col=column in sc_adata.obs indicating the sample cells belong to
@@ -169,11 +162,6 @@ def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, 
     :type sc_adata: anndata.AnnData
     :param st_adata: A spacemake processed spatial sample.
     :type st_adata: anndata.AnnData
-    ct_col=cell type column in scRNA-seq anndata obs
-    cells_prior=marginal probabilities for cell to be mapped
-    ref_weight=how much the visium gene expression data will be taken into account 
-    thr=minimum p-value to take highly variable genes from the scRNA-seq dataset
-    epsilon=enthropy regularisation parameter 
     :returns: A novosparc.cm.Tissue object with 2D expression information.
         The locations of the Tissue will be identical to the locations of 
         the spatial sample.
@@ -245,10 +233,6 @@ def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, 
 
 # %%
 def buildReconstAD(tissue, sc_ad):
-    """Makes anndata object from novosparc tissue object and reconstructs gene expression based on cell type proportions and single cell
-    expression data
-    tissue=novosparc tissue object
-    sc_ad=scRNA-seq anndata object"""
     reconst_ad = anndata.AnnData(
         csc_matrix(tissue.sdge.T),
         var = pd.DataFrame(index=tissue.dataset.var_names))
@@ -288,13 +272,9 @@ def deconv_sc(sc_ad, st_ad, sc_ct_col, sc_sample_col, p, ref_weight, filename, s
     return cells_prior
 
 # %%
-## w good for PIC and new data
+## CHANGE W for the future, good for PIC
 def getColocProbs(filesList, filePrefix, nCellTypes):
-    """ Get colocalisation probabilities (sum across spots of probabilities of each cell type pair being in the same spot) 
-    filesList=list of mapping anndata files 
-    filePrefix=prfix coming before the part of the file name indicating the sample
-    nCellTypes=number of cell types.
-    Returns concatenated single sample matrices of celltype x cell type"""
+    ## Get colocalisation
     CTcolocalizationP=pd.DataFrame()
     for file in filesList:
     
@@ -318,10 +298,8 @@ def getColocProbs(filesList, filePrefix, nCellTypes):
     return CTcolocalizationP
 
 # %%
-def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   
-    """Transforms matrix obtained with getColocProbs into a matrix of CT pairs x samples
-    CTcoloc=previously obtained colocalisation matrix from getColocprobs
-    complete=list with repeated values (ct1_x_ct2 and ct2_x_ct1)"""
+def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   ### matrix of CT pairs x samples
+    """complete=list with repeated values"""
     colocPerSample1=pd.DataFrame()
     if(complete==0):
         i=0
@@ -346,32 +324,77 @@ def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):
     
     return colocPerSample1
 
+#%%
+#def reshapeColoc_complete(CTcoloc):   ### matrix of CT pairs x samples
+#    colocPerSample1=pd.DataFrame()
+#    for ct in CTcoloc.columns[range(len(CTcoloc.columns)-1)]:
+#        x=CTcoloc.iloc[CTcoloc.index==ct,range(len(CTcoloc.columns)-1)]
+#        for ct2 in CTcoloc.columns[range(len(CTcoloc.columns)-1)]:
+#            probs=pd.DataFrame(x.iloc[:,x.columns==ct2])
+#            probs.index=CTcoloc["sample"].unique()
+#            probs.columns=[ct + '-' + ct2]
+#            colocPerSample1=pd.concat([colocPerSample1, probs], axis=1)
+
+#    #colocPerSample1[np.setdiff1d(colocPerSample1.columns, oneCTinteractions)]=colocPerSample1[np.setdiff1d(colocPerSample1.columns, oneCTinteractions)]*2
+#    return colocPerSample1
 
 # %%
 def cellCatContained(pair, cellCat):
     """Boolean element indicating whether the specified element (cell pair) is contained in 
-    a list (category)
-    pair=evaluated cell type pair
-    cellCat=category as a list of cell types"""
+    a list (category)"""
     #contained=[pair.contains(cellType) for cellType in cellCat]
     contained=[cellType in pair for cellType in cellCat]
     return True in contained
+
 # %%
-def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol, CTpairSep):
-    """Get cell communication scores per cell type pair per LR pair by summing that LR pair scores for that cell type pair. 
-    ccommTable=crossTalkeR results table (single condition)
-    LRscoresCol=scores column in the crossTalkeR table
-    CTpairSep=pattern separating cell type x from cell type y in pair name"""
-    ccommTable['allpair']=ccommTable['allpair'].str.replace('\|R', '')
-    ccommTable['allpair']=ccommTable['allpair'].str.replace('\|L', '')
-    ccommTable['allpair']=ccommTable['allpair'].str.replace('\|TF', '')
-   
-    scores = ccommTable[LRscoresCol].groupby(ccommTable['allpair']).sum()
-    return scores
-#%%
+#def calculate_CT_pair_scores(ccommTable, LRscoresCol, CTpairSep):
+#    """Get cell communication scores per cell type pair by summing all LR scores for that pair.
+#    If the inversed pair is also available, choose highest value. 
+#    ccommTable=crossTalkeR results table (single condition)"""
+#    scores = ccommTable[LRscoresCol].groupby(ccommTable['cellpair']).sum()
+
+#    # symmetrization
+#    for x in scores.index:
+#        if x.split(CTpairSep)[1]+CTpairSep+x.split(CTpairSep)[0] in scores.index:
+#            scores[x] = float(np.max([scores[x], scores[x.split(CTpairSep)[1]+CTpairSep+x.split(CTpairSep)[0]]]))
+
+#    return scores
+
+#def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol, CTpairSep):
+#    """Get cell communication scores per cell type pair by summing all LR scores for that pair.
+#    If the inversed pair is also available, choose highest value. 
+#    ccommTable=crossTalkeR results table (single condition)"""
+#    ccommTable['allpair']=ccommTable['allpair'].str.replace('\|R', '')
+#    ccommTable['allpair']=ccommTable['allpair'].str.replace('\|L', '')
+#    ccommTable['allpair']=ccommTable['allpair'].str.replace('\|TF', '')
+    
+#    scores = ccommTable[LRscoresCol].groupby(ccommTable['allpair']).sum()
+
+#    # symmetrization
+#    #for x in scores.index:
+#    #    if x.split(CTpairSep)[1]+CTpairSep+x.split(CTpairSep)[0] in scores.index:
+#    #        scores[x] = float(np.max([scores[x], scores[x.split(CTpairSep)[1]+CTpairSep+x.split(CTpairSep)[0]]]))
+
+#    return scores
+
+# %%
+#def ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
+#    db[dbMatchCol]=db[dbMatchCol].str.lower()
+#    CTpairScores_byCat=pd.DataFrame()
+#    for cat in db[dbCatCol].unique():    
+#    
+#        ccommScores_plt=calculate_CT_pair_scores_dir(ccommTable=ccommTable[[x in db[dbMatchCol][db[dbCatCol]==cat].tolist() for x in ccommTable[ccommMatchCol].str.lower().tolist()]], LRscoresCol=ccommLRscoresCol, CTpairSep='-')
+#        ccommScores_plt=ccommScores_plt[np.setdiff1d(ccommScores_plt.index, oneCTinteractions)]
+#    
+#        boxplotDF=pairCatDF.loc[ccommScores_plt.index,:]
+#        boxplotDF['LRscores']=ccommScores_plt[boxplotDF.index]
+#        boxplotDF['LRcat']=cat
+#        CTpairScores_byCat=pd.concat([CTpairScores_byCat, boxplotDF])
+#    CTpairScores_byCat['condition']=condition
+#        
+#    return CTpairScores_byCat
+
 def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
-    """Calculates scores per ligand category from a database"""
-    pairCatDF.index=pairCatDF.pairs
     db[dbMatchCol]=db[dbMatchCol].str.lower()
     ccommTable=ccommTable.iloc[[not(x in oneCTinteractions) for x in ccommTable['cellpair']],:]
     CTpairScores_byCat=pd.DataFrame()
@@ -392,21 +415,126 @@ def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchC
     CTpairScores_byCat['condition']=condition
         
     return CTpairScores_byCat
+
 #%%
+#### cell pairs by categories scatter plot function
 
-def equalizeScoresTables(ctrlTbl, expTbl, ctrlCondition, expCondition):
-    '''Makes communication score tables contain the same interactions to be compared'''
-    t=ctrlTbl.loc[np.setdiff1d(ctrlTbl.index, expTbl.index)]
-    t.LRscores=0
-    t.condition=expCondition
-    expTbl=pd.concat([expTbl, t])
+#def comm_colocScatter(colocScores, commScores, pairCatDF, catsList, colsList):
+#    """Colocalisation vs communication scatter plot function"""
+#    colocScores=colocScores/np.max(colocScores)
+#    commScores=commScores/np.max(commScores)
+    
+#    order = catsList
+#    colors = colsList
+    
+#    pairCatDF_Sub=pairCatDF.loc[colocScores.index.intersection(commScores.index),:]
 
-    t=expTbl.loc[np.setdiff1d(expTbl.index, ctrlTbl.index)]
-    t.LRscores=0
-    t.condition=ctrlCondition
-    ctrlTbl=pd.concat([ctrlTbl, t])
+#    fig = plt.figure()
+#    ax1 = fig.add_subplot(111)
 
-    return ctrlTbl, expTbl
+#    i=0
+#    for cat in order:
+#        if len(commScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index])>0:
+#            ax1.scatter(colocScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index], commScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index], c=colors[i], label=cat)
+#            b, a = np.polyfit(colocScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index], commScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index], deg=1)
+#            # Create sequence of numbers from smallest to highest score 
+#            xseq = np.linspace(np.min(colocScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index]), np.max(colocScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index]), num=100)
+#            ax1.plot(xseq, a + b * xseq, c=colors[i])
+#            ax1.axis('on')
+#        i=i+1
+ 
+#    recs = []
+#    for i in range(0,len(colors)):
+#        recs.append(mpatches.Rectangle((0,0),1,1,fc=colors[i]))
+#    plt.legend(recs,order,loc='lower right', ncol=2, bbox_to_anchor=(2, 0.1))
+#    plt.xlabel('colocalisation score')
+#    plt.ylabel('communication score')
+#    plt.show()
+
+#%%
+#def comm_colocScatter_stats(colocScores, commScores, pairCatDF, catsList):
+#    """colocalisation vs communication statistics"""
+#    colocScores=colocScores/np.max(colocScores)
+#    commScores=commScores/np.max(commScores)
+#    order = catsList
+#    statsDF=pd.DataFrame(index=['overall']+order, columns=['PearsonR', 'pvalue'])
+    
+#    pairCatDF_Sub=pairCatDF.loc[colocScores.index.intersection(commScores.index),:]
+    
+#    statsDF.PearsonR['overall']=scipy.stats.pearsonr(colocScores[colocScores.index.intersection(commScores.index)],commScores[colocScores.index.intersection(commScores.index)]).statistic
+#    statsDF.pvalue['overall']=scipy.stats.pearsonr(colocScores[colocScores.index.intersection(commScores.index)],commScores[colocScores.index.intersection(commScores.index)]).pvalue
+    
+#    for cat in order:
+#        if len(commScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index])>2:   
+#            statsDF.PearsonR[cat]=scipy.stats.pearsonr(colocScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index],commScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index]).statistic
+#            statsDF.pvalue[cat]=scipy.stats.pearsonr(colocScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index],commScores[pairCatDF_Sub[pairCatDF_Sub.cats==cat].index]).pvalue
+            
+#    return statsDF   
+
+#%%
+#def makeDiffColocDF(colocProbsC1, colocProbsC2, pairCatDF, catsCol, C1, C2, oneCTinteractions):
+#    """differential colocalisation DF (probabilities per category and condition)"""
+#    colocDFc1=pd.DataFrame(colocProbsC1, columns=['colocProb'])
+#    colocDFc1['cats']=pairCatDF[catsCol][colocDFc1.index]
+#    colocDFc1['condition']=C1
+#    colocDFc1=colocDFc1.loc[np.setdiff1d(colocDFc1.index, oneCTinteractions)]
+    
+#    colocDFc2=pd.DataFrame(colocProbsC2, columns=['colocProb'])
+#    colocDFc2['cats']=pairCatDF[catsCol][colocDFc2.index]
+#    colocDFc2['condition']=C2
+#    colocDFc2=colocDFc2.loc[np.setdiff1d(colocDFc2.index, oneCTinteractions)]
+    
+#    colocDF=pd.concat([colocDFc1, colocDFc2])
+#    colocDF['log10ColocProb']=np.log10(colocDF.colocProb)
+    
+#    return colocDF
+
+#%%
+#def getDiffColocStats(colocDF, C1, C2):
+#    """Wilcoxon tests results"""
+#    diffColocStats=pd.DataFrame(colocDF.cats.unique(), columns=['cats'])
+#    diffColocStats['wilcoxStat']=[scipy.stats.ranksums(colocDF.colocProb[(colocDF.cats==cat) & (colocDF.condition==C1)], colocDF.colocProb[(colocDF.cats==cat) & (colocDF.condition==C2)]).statistic for cat in colocDF['cats'].unique()]
+#    diffColocStats['wilcoxPval']=[scipy.stats.ranksums(colocDF.colocProb[(colocDF.cats==cat) & (colocDF.condition==C1)], colocDF.colocProb[(colocDF.cats==cat) & (colocDF.condition==C2)]).pvalue for cat in colocDF['cats'].unique()]
+#    return diffColocStats
+
+#%%
+#def commColocStats_perCat(ccommTable, db, dbMatchCol, dbCatCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, colocScores, cellCats, pairCatDF, condition):
+#    db[dbMatchCol]=db[dbMatchCol].str.lower()
+#    cats_comm_coloc_stats=pd.DataFrame()
+#    for cat in db[dbCatCol].unique():
+#        ccommScores_plt=calculate_CT_pair_scores(ccommTable=ccommTable[[x in db[dbMatchCol][db[dbCatCol]==cat].tolist() for x in ccommTable[ccommMatchCol].str.lower().tolist()]], LRscoresCol=ccommLRscoresCol, CTpairSep='-')
+#        ccommScores_plt=ccommScores_plt[np.setdiff1d(ccommScores_plt.index, oneCTinteractions)]
+#        colocScores_plt=colocScores
+#        if len(colocScores_plt.index.intersection(ccommScores_plt.index))>1:
+#            print(cat)
+        
+#            tmp=comm_colocScatter_stats(colocScores=colocScores, commScores=ccommScores_plt, 
+#                  pairCatDF=pairCatDF, catsList=cellCats)
+#            tmp['LRcat']=cat
+#            cats_comm_coloc_stats=pd.concat([cats_comm_coloc_stats, tmp])
+#    cats_comm_coloc_stats.index=cats_comm_coloc_stats.index+'_'+cats_comm_coloc_stats.LRcat 
+#    cats_comm_coloc_stats['condition']=condition
+#    cats_comm_coloc_stats['cellCat']=[x.split('_')[0] for x in cats_comm_coloc_stats.index]
+#    cats_comm_coloc_stats['cat']=cats_comm_coloc_stats.LRcat+'_'+cats_comm_coloc_stats.cellCat
+#    return cats_comm_coloc_stats
+
+#%%
+#def ctPairScores_perCat(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
+#    db[dbMatchCol]=db[dbMatchCol].str.lower()
+#    CTpairScores_byCat=pd.DataFrame()
+#    for cat in db[dbCatCol].unique():    
+    
+#        ccommScores_plt=calculate_CT_pair_scores(ccommTable=ccommTable[[x in db[dbMatchCol][db[dbCatCol]==cat].tolist() for x in ccommTable[ccommMatchCol].str.lower().tolist()]], LRscoresCol=ccommLRscoresCol, CTpairSep='->')
+#        ccommScores_plt=ccommScores_plt[np.setdiff1d(ccommScores_plt.index, oneCTinteractions)]
+    
+#        boxplotDF=pairCatDF.loc[ccommScores_plt.index,:]
+#        boxplotDF['LRscores']=ccommScores_plt[boxplotDF.index]
+#        boxplotDF['LRcat']=cat
+#        CTpairScores_byCat=pd.concat([CTpairScores_byCat, boxplotDF])
+#    CTpairScores_byCat['condition']=condition
+        
+#    return CTpairScores_byCat
+
 #%%
 def diffCcommStats(c1CTpairScores_byCat, c2CTpairScores_byCat, cellCatCol):
     """Differential cell communication per LR category"""
@@ -420,60 +548,8 @@ def diffCcommStats(c1CTpairScores_byCat, c2CTpairScores_byCat, cellCatCol):
         diffCommTable=pd.concat([diffCommTable, tmp])
     
     return diffCommTable
-#%%
 
-def plotDiffCcommStatsHM(diffCommTable, min_pval):
-    x=pd.Series(diffCommTable.wilcoxStat)
-    ## Remove non significant values and NaNs
-    x[[i>min_pval for i in np.array(diffCommTable.wilcoxPval)]]=0
-    x[np.isnan(x)]=0
-    ## Make dataframe to plot heatmap
-    x_hm=pd.DataFrame(np.array(x).reshape(-1, len(diffCommTable.cellCat.unique())))
-    x_hm.columns=diffCommTable.cellCat.unique()
-    x_hm.index=diffCommTable.LRcat.unique()
-    ## Plot heatmap
-    sns.set(font_scale=1.5)
-    plot=sns.clustermap(x_hm, cmap='vlag', center=0)
-    #plot.set_yticklabels(rotation=90)
-    plt.setp(plot.ax_heatmap.yaxis.get_majorticklabels(), rotation=1)
-    #plt.show()
-    return x_hm
 #%%
-
-def getExpectedColocProbsFromSCs(sc_adata, sample, cell_types, sc_data_sampleCol, sc_adata_annotationCol):
-    ## cell_types=cell types list
-    ## sc_adata=sc gene expression anndata
-    ## sample=name of sample in turn
-    ## sc_data_sampleCol=name of the sc_adata.obs column containing sample names to which cells belong
-    ## sc_adata_annotationCol=name of the sc_adata.obs column containing cell types of each cell
-    scCTprops=sc_adata.obs[sc_adata_annotationCol][sc_adata.obs[sc_data_sampleCol]==sample].value_counts()[cell_types]/sc_adata.obs[sc_adata_annotationCol][sc_adata.obs[sc_data_sampleCol]==sample].value_counts().sum()
-    scCTpairsProbs=pd.DataFrame()
-    
-    for x in scCTprops:
-        scCTpairsProbs=pd.concat([scCTpairsProbs, pd.DataFrame(x*scCTprops)])
-        
-    pci=[]
-    for x in scCTprops.index:
-        pci.append((x+'-'+scCTprops.index.astype(str)).tolist())    
-    scCTpairsProbs.index=[item for sublist in pci for item in sublist]
-    return scCTpairsProbs
-#%%
-
-def OvsE_coloc_test(observedColocProbs, expectedColocProbs, cell_types, testDistribution, oneCTinteractions, p=0.05):
-    # OvsE ratios
-    OvsE=observedColocProbs/expectedColocProbs
-    # Log scale
-    OvsE_HM=np.log2(OvsE)
-    # Filter non significant values
-    OvsE_HM[(OvsE_HM>np.quantile(np.log2(testDistribution), p/2)) & (OvsE_HM<np.quantile(np.log2(testDistribution), 1-(p/2)))]=0
-    OvsE_HM[oneCTinteractions]=0
-    # Reshape into data frame
-    OvsE_HMdf=pd.DataFrame(np.array(OvsE_HM).reshape(-1, len(cell_types)))
-    OvsE_HMdf.columns=cell_types
-    OvsE_HMdf.index=cell_types
-    return OvsE_HMdf
-#%%
-
 def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     """Colocalisation adjacency matrix (and differential coloc test matrix)"""
     x=pd.DataFrame(pairCatDF.pairs, columns=['pairs'], index=pairCatDF.pairs)
@@ -503,19 +579,6 @@ def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     np.fill_diagonal(adj.values, 0)
     return x_diff,adj
 
-#%%
-def getColocFilter(pairCatDF, adj, oneCTints):
-    colocFilt=pd.DataFrame(pairCatDF.pairs, columns=['pairs'], 
-                       index=pairCatDF.pairs)
-    colocFilt['filter']=0
-
-    for i in pairCatDF.pairs:
-        colocFilt['filter'][i]=adj.loc[i.split('->')[1],i.split('->')[0]]
-    
-    colocFilt['filter'][oneCTints]=1
-    colocFilt['filter'][colocFilt['filter']>0]=1
-    colocFilt=pd.DataFrame(colocFilt['filter'], index=colocFilt.index, columns=['filter'])
-    return colocFilt
 #%%
 def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20):
 
@@ -610,118 +673,138 @@ def getAdj_comm(diffCommTbl, pairCatDF, ncells, cat, p=0.05):
     return x_chem,adjChem
 
 #%%
+## Comm NW per category function
 
-def catNW(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=None, plot_title=''):    
+#def catNW(x_chem,adjChem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=None):    
+#    #cell group cmap
+#    cmap = plt.cm.get_cmap(group_cmap, ncols)
+#    cgroup_cmap=[mcolors.rgb2hex(cmap(i)[:3]) for i in range(cmap.N)]
+       
+#    ## Graph of cell type pairs that get closer together in ischemia
+
+#    gComm_Chem=nx.from_pandas_adjacency(adjChem, create_using=nx.DiGraph)
+#    pos = nx.spring_layout(gComm_Chem)
+
+#    ## Label positions
+#    pos_attrs = {}
+#    for node, coords in pos.items():
+#        pos_attrs[node] = (coords[0], coords[1] + 0.08)
+
+#    ## Node color groups
+#    if color_group is None:
+
+#        color_group=pd.Series(list(gComm_Chem.nodes))
+#        i=0
+#        for k in list(cell_group.keys()):
+#            color_group[[cellCatContained(pair=p, cellCat=cell_group[k]) for p in color_group]]=cgroup_cmap[i]
+#            i=i+1
+        
+#    ## Edge thickness
+#    weights = nx.get_edge_attributes(gComm_Chem,'weight').values()
+
+#    ## Edge colors based on diff coloc
+#    edgeCols=pd.Series(['lightblue' if x_chem.loc[x[0], x[1]]<0 else 'orange' for x in list(gComm_Chem.edges)])
+#    edgeCols.index=[x[0]+'->'+x[1] for x in list(gComm_Chem.edges)]
+    
+#    orange_edges = [(u,v) for u,v in gComm_Chem.edges if edgeCols[u+'->'+v] == 'orange']
+#    blue_edges = [(u,v) for u,v in gComm_Chem.edges if edgeCols[u+'->'+v] == 'lightblue']
+    
+#    inter=pd.Series(list(weights))/pd.Series(list(weights)).max()
+#    inter.index=edgeCols.index
+#    pos = nx.drawing.nx_agraph.graphviz_layout(colocNW,prog='neato')
+    
+#    ## pagerank sized nodes
+#    npg = nx.pagerank(gComm_Chem,max_iter=1000)
+#    npg=list(npg.values())
+    
+#    f,ax1 = plt.subplots(1,1,figsize=(10,10),dpi=100) 
+#    nx.draw_networkx_nodes(gComm_Chem,pos,node_size=1000*((npg-np.min(npg))/(np.max(npg)-np.min(npg))+1e-5),
+#        node_color=color_group,ax=ax1)
+#    edcol = nx.get_edge_attributes(gComm_Chem,'weight')
+#    edcol = pd.Series(list(edcol.values())/np.max(list(edcol.values())))
+#    edcol.index=edgeCols.index
+#    nx.draw_networkx_edges(gComm_Chem,pos=pos,edge_color=edcol[edgeCols=='lightblue'],
+#        connectionstyle="arc3,rad=0.15",
+#        width=5*inter[edgeCols=='lightblue'],ax=ax1, edgelist=blue_edges, edge_cmap=cmap1)
+#    nx.draw_networkx_edges(gComm_Chem,pos=pos,edge_color=edcol[edgeCols=='orange'],
+#        connectionstyle="arc3,rad=0.15",
+#        width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap2)
+#    nx.draw_networkx_labels(gComm_Chem,pos,verticalalignment='bottom',
+#        font_size=12,clip_on=False,ax=ax1)
+#    #ax1.set_title(f'RepresentativeCCI_{idc}:{nt}')
+#    #plt.title(cat)
+#    ax1.axis('off')
+#    return gComm_Chem
+
+#%%
+
+def catNW_test(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=None):    
+    colocNW=colocNW.to_directed()
     #cell group cmap
     cmap = plt.cm.get_cmap(group_cmap, ncols)
     cgroup_cmap=[mcolors.rgb2hex(cmap(i)[:3]) for i in range(cmap.N)]
-    
-    ###
-    # create comm network
-    G=nx.Graph()
-    G.add_nodes_from(colocNW)
-    G.add_edges_from(colocNW.edges())
-    G=G.to_directed()
-    ###
        
+    ## Graph of cell type pairs that get closer together in ischemia
+
+    #gComm_Chem=nx.from_pandas_adjacency(adjChem, create_using=nx.DiGraph)
+    #pos = nx.spring_layout(gComm_Chem)
+    pos=nx.drawing.nx_agraph.graphviz_layout(colocNW,prog='neato')
+
+    ## Label positions
+    pos_attrs = {}
+    for node, coords in pos.items():
+        pos_attrs[node] = (coords[0], coords[1] + 0.08)
+
     ## Node color groups
     if color_group is None:
-        color_group=pd.Series(list(G.nodes))
+
+        color_group=pd.Series(list(colocNW.nodes))
         i=0
         for k in list(cell_group.keys()):
             color_group[[cellCatContained(pair=p, cellCat=cell_group[k]) for p in color_group]]=cgroup_cmap[i]
             i=i+1
         
     ## Edge thickness
-    for x in list(G.edges):
-        G[x[0]][x[1]]['weight'] = x_chem.loc[x[0], x[1]]
-    
-    weights=nx.get_edge_attributes(G,'weight').values()
+    #weights = nx.get_edge_attributes(gComm_Chem,'weight').values()
+    weights=[x_chem.loc[x[0], x[1]] for x in list(colocNW.edges)]
 
     ## Edge colors based on diff coloc
-    edgeCols=pd.Series(['lightblue' if x_chem.loc[x[0], x[1]]<0 else 'orange' for x in list(G.edges)])
-    edgeCols.index=[x[0]+'->'+x[1] for x in list(G.edges)]
+    edgeCols=pd.Series(['lightblue' if x_chem.loc[x[0], x[1]]<0 else 'orange' for x in list(colocNW.edges)])
+    edgeCols.index=[x[0]+'->'+x[1] for x in list(colocNW.edges)]
     
-    orange_edges = [(u,v) for u,v in G.edges if edgeCols[u+'->'+v] == 'orange']
-    blue_edges = [(u,v) for u,v in G.edges if edgeCols[u+'->'+v] == 'lightblue']
+    orange_edges = [(u,v) for u,v in colocNW.edges if edgeCols[u+'->'+v] == 'orange']
+    blue_edges = [(u,v) for u,v in colocNW.edges if edgeCols[u+'->'+v] == 'lightblue']
     
     inter=pd.Series(list(weights))/pd.Series(list(weights)).max()
     inter.index=edgeCols.index
-    pos = nx.drawing.nx_agraph.graphviz_layout(G,prog='neato')
+    pos = nx.drawing.nx_agraph.graphviz_layout(colocNW,prog='neato')
     
     ## pagerank sized nodes
-    #npg = nx.pagerank(G,max_iter=1000)
-    #npg=list(npg.values())
-    ## edge color intensity by weight 
-    edcol = nx.get_edge_attributes(G,'weight')
-    edcol = pd.Series(list(edcol.values())/np.max(list(edcol.values())))
-    edcol.index=edgeCols.index
-    
-    ###
+    npg = nx.pagerank(colocNW,max_iter=1000)
+    npg=list(npg.values())
     
     f,ax1 = plt.subplots(1,1,figsize=(10,10),dpi=100) 
-    #nx.draw_networkx_nodes(G,pos,node_size=1000*((npg-np.min(npg))/(np.max(npg)-np.min(npg))+1e-5),
-    #    node_color=color_group,ax=ax1)
-    nx.draw_networkx_nodes(G,pos, node_color=color_group,ax=ax1)
-    nx.draw_networkx_edges(G,pos=pos,edge_color=edcol[edgeCols=='lightblue'],
+    nx.draw_networkx_nodes(colocNW,pos,node_size=1000*((npg-np.min(npg))/(np.max(npg)-np.min(npg))+1e-5),
+        node_color=color_group,ax=ax1)
+    #edcol = nx.get_edge_attributes(gComm_Chem,'weight')
+    #edcol = pd.Series(list(edcol.values())/np.max(list(edcol.values())))
+    edcol = pd.Series(weights/np.max(weights))
+    edcol.index=edgeCols.index
+    nx.draw_networkx_edges(colocNW,pos=pos,edge_color=edcol[edgeCols=='lightblue'],
         connectionstyle="arc3,rad=0.15",
         width=5*inter[edgeCols=='lightblue'],ax=ax1, edgelist=blue_edges, edge_cmap=cmap1)
-    nx.draw_networkx_edges(G,pos=pos,edge_color=edcol[edgeCols=='orange'],
+    nx.draw_networkx_edges(colocNW,pos=pos,edge_color=edcol[edgeCols=='orange'],
         connectionstyle="arc3,rad=0.15",
         width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap2)
-    nx.draw_networkx_labels(G,pos,verticalalignment='bottom',
+    nx.draw_networkx_labels(colocNW,pos,verticalalignment='bottom',
         font_size=12,clip_on=False,ax=ax1)
-    f.suptitle(plot_title)
-    #ax2.set_facecolor('white')
-    #plt.show()
+    #ax1.set_title(f'RepresentativeCCI_{idc}:{nt}')
+    #plt.title(cat)
     ax1.axis('off')
-    to_remove=[(a,b) for a, b, attrs in G.edges(data=True) if attrs["weight"] == 0]
-    G.remove_edges_from(to_remove)
-    return G
-#%%
+    #return gComm_Chem
+
+    #%%
 """My unique func without value reordering"""
 def unique(array):
     uniq, index = np.unique(array, return_index=True)
     return uniq[index.argsort()]
-
-#%%
-def PIC_BGdoubletsOEratios(adata_singlets, nmults, annot, singIDs, sep):
-    #nmults = Number of multiplets
-    #annot = singlets annotation (character vector)
-    #singIDs = singlets IDs (character vector)
-    
-    ### test diff coloc for PICseq=> 
-
-    ## Generate distribution of O/E ratios for colocalization prob of cell type pairs in randomly generated doublets (background dist)
-    
-    rdf=pd.DataFrame(adata_singlets.obs.annotation)
-    rdf.columns=['annot']
-    rdf.index=adata_singlets.obs.index
-    rdf['pair']=''
-    
-    ## Get random singlets pairs
-    pairNums=[i for i in range(int(np.round(adata_singlets.obs.shape[0]/2))) for _ in range(2)]
-    random.seed(123)
-    pairNumsIdx=random.sample(list(adata_singlets.obs.index), len(pairNums))
-    rdf.pair[pairNumsIdx]=pairNums
-
-    pairCounts=[rdf.annot[rdf.pair==i][0]+'-'+rdf.annot[rdf.pair==i][1] for i in rdf.pair.value_counts().index[rdf.pair.value_counts()==2]]
-    
-    ## Expected probabilities of cell type pairs
-    probs=rdf.annot[[i!='' for i in rdf.pair]].value_counts()/rdf.annot[[i!='' for i in rdf.pair]].value_counts().sum()
-
-    pairProbs=pd.DataFrame()
-    #pairProbs=[]
-    for x in probs:
-        pairProbs=pd.concat([pairProbs, pd.DataFrame(x*probs)])
-        #pairProbs.append(x*probs)
-    pci=[]
-    for x in probs.index:
-        pci.append((x+'-'+probs.index.astype(str)).tolist())    
-    pairProbs.index=[item for sublist in pci for item in sublist]
-
-    ## Observed probabilities of cell type pairs
-    pairProbsO=pd.Series(pairCounts).value_counts()/pd.Series(pairCounts).value_counts().sum()
-    ## O/E ratios
-    OEratios=pairProbsO/pairProbs.annot[pairProbsO.index]
-    return OEratios
