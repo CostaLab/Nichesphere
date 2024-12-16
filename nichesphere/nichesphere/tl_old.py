@@ -75,6 +75,8 @@ def locations_score_per_cluster(tissue: novosparc.cm.Tissue, cluster_key: str='c
     
     return pd.DataFrame(arr, columns=clusts_names)
 
+
+
 # %%
 def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
     '''
@@ -162,6 +164,11 @@ def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, 
     :type sc_adata: anndata.AnnData
     :param st_adata: A spacemake processed spatial sample.
     :type st_adata: anndata.AnnData
+    ct_col=cell type column in scRNA-seq anndata obs
+    cells_prior=marginal probabilities for cell to be mapped
+    ref_weight=how much the visium gene expression data will be taken into account 
+    thr=minimum p-value to take highly variable genes from the scRNA-seq dataset
+    epsilon=enthropy regularisation parameter 
     :returns: A novosparc.cm.Tissue object with 2D expression information.
         The locations of the Tissue will be identical to the locations of 
         the spatial sample.
@@ -181,7 +188,7 @@ def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, 
             'Normalised values are expected for both sc_adata and st_adata.')
 
     # calculate variable genes for both
-    sc.tl.rank_genes_groups(sc_adata, groupby=ct_col, method='wilcoxon', use_raw=False)
+    sc.tl.rank_genes_groups(sc_adata, groupby=ct_col, method='wilcoxon', use_raw=False, copy=False)
     HVGsDF=pd.DataFrame(0, columns=sc_adata.obs[ct_col].unique(), index=sc_adata.var_names)
     for c in HVGsDF.columns:
         t=pd.Series(sc_adata.uns['rank_genes_groups']['pvals_adj'][c], index=sc_adata.uns['rank_genes_groups']['names'][c])
@@ -190,6 +197,7 @@ def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, 
     hvgs=(HVGsDF<thr).sum(axis=1).index[[(i!=0) for i in ((HVGsDF<thr).sum(axis=1))]] #genes that are significant for at least one or two groups
     sc_adata_hv = hvgs.to_list()
     
+    st_adata.var_names_make_unique()
     sc.pp.highly_variable_genes(st_adata)
     st_adata_hv = st_adata.var_names[st_adata.var.highly_variable].to_list()
 
@@ -233,6 +241,10 @@ def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, 
 
 # %%
 def buildReconstAD(tissue, sc_ad):
+    """Makes anndata object from novosparc tissue object and reconstructs gene expression based on cell type proportions and single cell
+    expression data
+    tissue=novosparc tissue object
+    sc_ad=scRNA-seq anndata object"""
     reconst_ad = anndata.AnnData(
         csc_matrix(tissue.sdge.T),
         var = pd.DataFrame(index=tissue.dataset.var_names))
@@ -244,7 +256,9 @@ def buildReconstAD(tissue, sc_ad):
 def deconv(sc_ad, st_ad, sc_ct_col, sc_sample_col, p, ref_weight, filename, sample, thr=0.0001, epsilon=5e-4, sc_mapping_file='sc_mapping.csv'):
     """Whole deconvolution pipeline from cells prior probabilities to be mapped 
     to annData with reconstructed gene expression and cell type proportions as obs"""
-    st_ad.obsm['spatial']=st_ad.obsm['X_spatial']
+    st_ad.uns['log1p']["base"]=None
+    if 'X_spatial' in st_ad.obsm:
+        st_ad.obsm['spatial']=st_ad.obsm['X_spatial']
     cells_prior=setPriorDef(sc_ad, ct_col=sc_ct_col, sample_col=sc_sample_col, sample=sample, p=p)
     tissue_reconst = novosparc_mapping_Def(sc_adata = sc_ad, st_adata = st_ad, ct_col=sc_ct_col, cells_prior=cells_prior, ref_weight=ref_weight, thr=thr, epsilon=epsilon)
     reconst_adata=buildReconstAD(tissue_reconst, sc_ad)
@@ -259,7 +273,9 @@ def deconv(sc_ad, st_ad, sc_ct_col, sc_sample_col, p, ref_weight, filename, samp
 def deconv_sc(sc_ad, st_ad, sc_ct_col, sc_sample_col, p, ref_weight, filename, sample, thr=0.0001, epsilon=5e-4, sc_mapping_file='sc_mapping.csv'):
     """Whole deconvolution pipeline from cells prior probabilities to be mapped 
     to annData with reconstructed gene expression and cell type proportions as obs"""
-    st_ad.obsm['spatial']=st_ad.obsm['X_spatial']
+    st_ad.uns['log1p']["base"]=None
+    if 'X_spatial' in st_ad.obsm:
+        st_ad.obsm['spatial']=st_ad.obsm['X_spatial']
     cells_prior=setPrior_sampleReg(sc_ad, ct_col=sc_ct_col, sample_col=sc_sample_col, sample=sample, p=p)
     tissue_reconst = novosparc_mapping_Def(sc_adata = sc_ad, st_adata = st_ad, ct_col=sc_ct_col, cells_prior=cells_prior, ref_weight=ref_weight, thr=thr, epsilon=epsilon)
     reconst_adata=buildReconstAD(tissue_reconst, sc_ad)

@@ -14,8 +14,8 @@ import ot
 import networkx as nx
 import statsmodels
 import logging
-import novosparc
-import anndata
+#import novosparc
+#import anndata
 import itertools
 import sklearn
 
@@ -23,12 +23,12 @@ from scipy.sparse import csc_matrix
 
 from numpy import ndarray
 
-from statsmodels import stats
+#from statsmodels import stats
 
 from matplotlib.colors import ListedColormap
 
-logger_name = 'spacemake.spatial.novosparc_integration'
-logger = logging.getLogger(logger_name)
+#logger_name = 'spacemake.spatial.novosparc_integration'
+#logger = logging.getLogger(logger_name)
 
 # Choose colormap
 cmap = plt.cm.Blues
@@ -66,33 +66,6 @@ cmap4[:,-1] = np.linspace(0, 0.3, cmap.N)
 # Create new colormap
 cmap4 = ListedColormap(cmap4)
 
-
-
-# %%
-def locations_score_per_cluster(tissue: novosparc.cm.Tissue, cluster_key: str='clusters', sc_mapping_file='sc_mapping.csv') -> ndarray:
-    """Maps the annotated clusters obtained from the scRNA-seq analysis onto
-    the tissue space.
-    :param: tissue:    the novosparc tissue object containing the gene expression data,
-                      the clusters annotation and the spatial reconstruction. Assumes
-                      that the cluster annotation exists in the underlying anndata object.
-    :type: tissue: novosparc.cm.Tissue
-    :param: cluster_key: the key of the clustering to be used for deduction
-    :type: cluster_key: str
-    :returns: A numpy list of cluster names, one per each spot
-    :rtype: numpy.ndarray
-    """
-
-    clusts = tissue.dataset.obs[cluster_key].to_numpy().flatten()
-    clusts_names = np.unique(clusts)
-
-
-    #arr=[np.array([np.median(np.array(tissue.gw[:, location][np.argwhere(clusts == cluster).flatten()])) for cluster in clusts_names]) for location in range(len(tissue.locations))]
-    t=pd.DataFrame(tissue.gw)
-    t.to_csv(sc_mapping_file)
-    arr=[np.array([np.sum(np.array(tissue.gw[:, location][np.argwhere(clusts == cluster).flatten()])) for cluster in clusts_names]) for location in range(len(tissue.locations))]
-
-    
-    return pd.DataFrame(arr, columns=clusts_names)
 
 # %%
 def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
@@ -177,138 +150,6 @@ def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=
     
     return cells_prior
 #%%
-
-def novosparc_mapping_Def(sc_adata: anndata.AnnData, st_adata: anndata.AnnData, ct_col, cells_prior=None, ref_weight=0.5, thr=0.05, epsilon=5e-4) -> novosparc.cm.Tissue:
-    """
-    Given two AnnData objects, one single-cell (with cell type column in obs) and one spatial, this function
-    will map the expression of the single-cell data onto the spatial data using
-    shared highly variable genes as markers.
-    :param sc_adata: A spacemake processed single-cell sample.
-    :type sc_adata: anndata.AnnData
-    :param st_adata: A spacemake processed spatial sample.
-    :type st_adata: anndata.AnnData
-    ct_col=cell type column in scRNA-seq anndata obs
-    cells_prior=marginal probabilities for cell to be mapped
-    ref_weight=how much the visium gene expression data will be taken into account 
-    thr=minimum p-value to take highly variable genes from the scRNA-seq dataset
-    epsilon=enthropy regularisation parameter 
-    :returns: A novosparc.cm.Tissue object with 2D expression information.
-        The locations of the Tissue will be identical to the locations of 
-        the spatial sample.
-    :rtype: novosparc.cm.Tissue
-    """
-
-    from scanpy._utils import check_nonnegative_integers
-    from scipy.sparse import csc_matrix
-
-    logger.info('Mapping single-cell data onto spatial data with novosparc')
-
-    if (check_nonnegative_integers(sc_adata.X)
-        or check_nonnegative_integers(st_adata.X)
-    ):
-        # if any of the inputs is count-data, raise error
-        raise ValueError(f'External dge seems to contain raw counts. '+
-            'Normalised values are expected for both sc_adata and st_adata.')
-
-    # calculate variable genes for both
-    sc.tl.rank_genes_groups(sc_adata, groupby=ct_col, method='wilcoxon', use_raw=False, copy=False)
-    HVGsDF=pd.DataFrame(0, columns=sc_adata.obs[ct_col].unique(), index=sc_adata.var_names)
-    for c in HVGsDF.columns:
-        t=pd.Series(sc_adata.uns['rank_genes_groups']['pvals_adj'][c], index=sc_adata.uns['rank_genes_groups']['names'][c])
-        HVGsDF[c]=t[sc_adata.var_names]
-    thr=thr
-    hvgs=(HVGsDF<thr).sum(axis=1).index[[(i!=0) for i in ((HVGsDF<thr).sum(axis=1))]] #genes that are significant for at least one or two groups
-    sc_adata_hv = hvgs.to_list()
-    
-    st_adata.var_names_make_unique()
-    sc.pp.highly_variable_genes(st_adata)
-    st_adata_hv = st_adata.var_names[st_adata.var.highly_variable].to_list()
-
-    markers = list(set(sc_adata_hv).intersection(st_adata_hv))
-
-    logger.info(f'{len(markers)} number of common markers found. Using them' +
-        ' for reconstruction')
-
-
-    if not 'spatial' in st_adata.obsm:
-        raise TypeError(f'The object provided to st_adata is not spatial')
-
-
-    # make dense dataset
-    if(scipy.sparse.issparse(sc_adata.X)):
-        dense_dataset = anndata.AnnData(
-            sc_adata.X.toarray(),
-            obs = sc_adata.obs,
-            var = sc_adata.var)
-    else:
-        dense_dataset = anndata.AnnData(
-            sc_adata.X,
-            obs = sc_adata.obs,
-            var = sc_adata.var)
-    
-    marker_ix = [dense_dataset.var.index.get_loc(marker) for marker in markers]
-
-    tissue = novosparc.cm.Tissue(dataset=dense_dataset, locations=st_adata.obsm['spatial'])
-    num_neighbors_s = 5
-    num_neighbors_t = 5
-
-    tissue.setup_linear_cost(markers_to_use=marker_ix, atlas_matrix=st_adata.to_df()[markers].values,
-                             markers_metric='minkowski', markers_metric_p=2)
-    tissue.setup_smooth_costs(dge_rep = sc_adata.to_df()[sc_adata_hv],
-                              num_neighbors_s=num_neighbors_s,
-                              num_neighbors_t=num_neighbors_t)
-
-    tissue.reconstruct(alpha_linear=ref_weight, epsilon=epsilon, p_expression=cells_prior)
-
-    return tissue
-
-# %%
-def buildReconstAD(tissue, sc_ad):
-    """Makes anndata object from novosparc tissue object and reconstructs gene expression based on cell type proportions and single cell
-    expression data
-    tissue=novosparc tissue object
-    sc_ad=scRNA-seq anndata object"""
-    reconst_ad = anndata.AnnData(
-        csc_matrix(tissue.sdge.T),
-        var = pd.DataFrame(index=tissue.dataset.var_names))
-    reconst_ad.X = np.sum(sc_ad.X) * reconst_ad.X / np.sum(reconst_ad.X)
-    reconst_ad.obsm['spatial'] = np.array(pd.DataFrame(tissue.locations))
-    return(reconst_ad)
-
-# %%
-def deconv(sc_ad, st_ad, sc_ct_col, sc_sample_col, p, ref_weight, filename, sample, thr=0.0001, epsilon=5e-4, sc_mapping_file='sc_mapping.csv'):
-    """Whole deconvolution pipeline from cells prior probabilities to be mapped 
-    to annData with reconstructed gene expression and cell type proportions as obs"""
-    st_ad.uns['log1p']["base"]=None
-    if 'X_spatial' in st_ad.obsm:
-        st_ad.obsm['spatial']=st_ad.obsm['X_spatial']
-    cells_prior=setPriorDef(sc_ad, ct_col=sc_ct_col, sample_col=sc_sample_col, sample=sample, p=p)
-    tissue_reconst = novosparc_mapping_Def(sc_adata = sc_ad, st_adata = st_ad, ct_col=sc_ct_col, cells_prior=cells_prior, ref_weight=ref_weight, thr=thr, epsilon=epsilon)
-    reconst_adata=buildReconstAD(tissue_reconst, sc_ad)
-    test=locations_score_per_cluster(tissue=tissue_reconst, cluster_key=sc_ct_col, sc_mapping_file=sc_mapping_file)
-    t=test.T/test.sum(axis=1)
-    #reconst_adata.obs=test/test.sum(axis=1)[0]
-    #reconst_adata.obs=test/test.sum(axis=1)
-    reconst_adata.obs=t.T
-    reconst_adata.write_h5ad(filename+'.h5ad')
-    return cells_prior
-#%%
-def deconv_sc(sc_ad, st_ad, sc_ct_col, sc_sample_col, p, ref_weight, filename, sample, thr=0.0001, epsilon=5e-4, sc_mapping_file='sc_mapping.csv'):
-    """Whole deconvolution pipeline from cells prior probabilities to be mapped 
-    to annData with reconstructed gene expression and cell type proportions as obs"""
-    st_ad.uns['log1p']["base"]=None
-    if 'X_spatial' in st_ad.obsm:
-        st_ad.obsm['spatial']=st_ad.obsm['X_spatial']
-    cells_prior=setPrior_sampleReg(sc_ad, ct_col=sc_ct_col, sample_col=sc_sample_col, sample=sample, p=p)
-    tissue_reconst = novosparc_mapping_Def(sc_adata = sc_ad, st_adata = st_ad, ct_col=sc_ct_col, cells_prior=cells_prior, ref_weight=ref_weight, thr=thr, epsilon=epsilon)
-    reconst_adata=buildReconstAD(tissue_reconst, sc_ad)
-    test=locations_score_per_cluster(tissue=tissue_reconst, cluster_key=sc_ct_col, sc_mapping_file=sc_mapping_file)
-    t=test.T/test.sum(axis=1)
-    #reconst_adata.obs=test/test.sum(axis=1)[0]
-    #reconst_adata.obs=test/test.sum(axis=1)
-    reconst_adata.obs=t.T
-    reconst_adata.write_h5ad(filename+'.h5ad')
-    return cells_prior
 
 # %%
 ## w good for PIC and new data
@@ -526,6 +367,25 @@ def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     adj[adj==1]=0
     np.fill_diagonal(adj.values, 0)
     return x_diff,adj
+
+#%%
+def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
+    ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
+    pairsDir=[]
+    for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
+        for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
+            pairsDir.append(ct+'->'+ct2)
+    pairCatDFdir=pd.DataFrame(pairsDir, columns=['pairs'])
+    
+    pairCatDFdir['colocCats']=''
+    for clust in np.sort(coloc_clusts.unique()):
+        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
+    
+    for comb in list(itertools.permutations(list(niches.keys()), 2)):
+        pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
+
+    return pairCatDFdir
+
 
 #%%
 def getColocFilter(pairCatDF, adj, oneCTints):
