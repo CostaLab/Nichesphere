@@ -151,6 +151,24 @@ def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=
     return cells_prior
 #%%
 
+def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
+    ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
+    pairsDir=[]
+    for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
+        for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
+            pairsDir.append(ct+'->'+ct2)
+    pairCatDFdir=pd.DataFrame(pairsDir, columns=['pairs'])
+    
+    pairCatDFdir['colocCats']=''
+    for clust in np.sort(coloc_clusts.unique()):
+        #pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
+        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
+
+    for comb in list(itertools.permutations(list(niches.keys()), 2)):
+        #pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
+        pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
+
+    return pairCatDFdir
 # %%
 ## w good for PIC and new data
 #def getColocProbs(filesList, filePrefix, nCellTypes):
@@ -400,46 +418,6 @@ def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     adj[adj==1]=0
     np.fill_diagonal(adj.values, 0)
     return x_diff,adj
-
-#%%
-#def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
-#    ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
-#    pairsDir=[]
-#    for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
-#        for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
-#            pairsDir.append(ct+'->'+ct2)
-#    pairCatDFdir=pd.DataFrame(pairsDir, columns=['pairs'])
-    
-#    pairCatDFdir['colocCats']=''
-#    for clust in np.sort(coloc_clusts.unique()):
-#        #pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
-#        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
-
-#    for comb in list(itertools.permutations(list(niches.keys()), 2)):
-#        #pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
-#        pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
-
-#    return pairCatDFdir
-
-def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
-    ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
-    pairsDir=[]
-    for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
-        for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
-            pairsDir.append(ct+'->'+ct2)
-    pairCatDFdir=pd.DataFrame(pairsDir, columns=['pairs'])
-    
-    pairCatDFdir['colocCats']=''
-    for clust in np.sort(coloc_clusts.unique()):
-        #pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
-        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
-
-    for comb in list(itertools.permutations(list(niches.keys()), 2)):
-        #pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
-        pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
-
-    return pairCatDFdir
-
 
 #%%
 def getColocFilter(pairCatDF, adj, oneCTints):

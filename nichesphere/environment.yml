@@ -4,8 +4,15 @@ channels:
   - defaults
 dependencies:
   - graphviz=12.0.0=hba01fac_0
+<<<<<<< HEAD
   - jupyterlab=4.3.3=pyhd8ed1ab_0
   - pygraphviz=1.14=py310h9a1d609_0
   - python=3.10.16=he725a3c_1_cpython
   - pip:
       - poetry==1.8.5
+=======
+  - pygraphviz=1.14=py310h9a1d609_0
+  - python=3.10.16=he725a3c_1_cpython
+  - pip:
+        - poetry==1.8.5
+>>>>>>> d08e3a24ae24eedb08a1dd8c23935639598ad24d
