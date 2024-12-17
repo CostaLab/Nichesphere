@@ -256,6 +256,7 @@ def cells_niche_colors(CTs, niche_colors, niche_dict):
     niche_df.index=niche_df.cell
     return niche_df
 
+
 # %%
 def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol, CTpairSep):
     """Get cell communication scores per cell type pair per LR pair by summing that LR pair scores for that cell type pair. 
