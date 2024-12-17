@@ -153,36 +153,29 @@ def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=
 
 # %%
 ## w good for PIC and new data
-#def getColocProbs(filesList, filePrefix, nCellTypes):
-def getColocProbs(CTprobs, spotSamples):
+def getColocProbs(filesList, filePrefix, nCellTypes):
     """ Get colocalisation probabilities (sum across spots of probabilities of each cell type pair being in the same spot) 
-    #filesList=list of mapping anndata files 
-    #filePrefix=prfix coming before the part of the file name indicating the sample
-    CTprobs=cell type probabilities per spot
-    spotSamples=sample to which each spot belongs, with cell id as index
+    filesList=list of mapping anndata files 
+    filePrefix=prfix coming before the part of the file name indicating the sample
     nCellTypes=number of cell types.
     Returns concatenated single sample matrices of celltype x cell type"""
     CTcolocalizationP=pd.DataFrame()
-    #for file in filesList:
-    for smple in spotSamples.unique():
+    for file in filesList:
     
-        #sample=file.replace(filePrefix, "")
-        #sample=sample.replace(".h5ad", "")
+        sample=file.replace(filePrefix, "")
+        sample=sample.replace(".h5ad", "")
     
-        #testAdata = sc.read(file)
-        #test=testAdata.obs.iloc[:,0:nCellTypes]
-        test=CTprobs.loc[spotSamples.index[spotSamples==smple]]
+        testAdata = sc.read(file)
+        test=testAdata.obs.iloc[:,0:nCellTypes]
         CTcoloc_P = pd.DataFrame()
         i=0
         for ct in test.columns:
-            ##w=pd.DataFrame([test[ct]*test[col]*len(test.index) for col in test.iloc[:,0:nCellTypes].columns], index=test.iloc[:,0:nCellTypes].columns).sum(axis=1)
-            #w=pd.DataFrame([test[ct]*test[col]/len(test.index) for col in test.iloc[:,0:nCellTypes].columns], index=test.iloc[:,0:nCellTypes].columns).sum(axis=1)
-            w=pd.DataFrame([test[ct]*test[col]/len(test.index) for col in test.columns], index=test.columns).sum(axis=1)
+            #w=pd.DataFrame([test[ct]*test[col]*len(test.index) for col in test.iloc[:,0:nCellTypes].columns], index=test.iloc[:,0:nCellTypes].columns).sum(axis=1)
+            w=pd.DataFrame([test[ct]*test[col]/len(test.index) for col in test.iloc[:,0:nCellTypes].columns], index=test.iloc[:,0:nCellTypes].columns).sum(axis=1)
             CTcoloc_P = pd.concat([CTcoloc_P, w], axis=1)
             i=i+1
-        #CTcoloc_P.columns=test.iloc[:,0:nCellTypes].columns
-        CTcoloc_P.columns=test.columns
-        CTcoloc_P["sample"]=smple
+        CTcoloc_P.columns=test.iloc[:,0:nCellTypes].columns
+        CTcoloc_P["sample"]=sample
         CTcolocalizationP = pd.concat([CTcolocalizationP, CTcoloc_P])
     
     #CTcolocalizationPnorm.to_csv("./CTcolocalizationProbs_NS_wPrior.csv")
@@ -228,17 +221,6 @@ def cellCatContained(pair, cellCat):
     contained=[cellType in pair for cellType in cellCat]
     return True in contained
 # %%
-def cells_niche_colors(CTs, niche_colors, niche_dict):
-    niche_df=pd.DataFrame(CTs, columns=['cell'])
-    niche_df['niche']=niche_colors.index[0]
-    niche_df['color']=niche_colors[0]
-    for key in list(niche_dict.keys()):
-        niche_df['niche'][[c in niche_dict[key] for c in niche_df.cell]]=key
-        niche_df['color'][niche_df['niche']==key]=niche_colors[key]
-    niche_df.index=niche_df.cell
-    return niche_df
-
-# %%
 def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol, CTpairSep):
     """Get cell communication scores per cell type pair per LR pair by summing that LR pair scores for that cell type pair. 
     ccommTable=crossTalkeR results table (single condition)
@@ -275,21 +257,6 @@ def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchC
     CTpairScores_byCat['condition']=condition
         
     return CTpairScores_byCat
-#%%
-
-def processCTKRoutput(ctkrTbl):
-    ctkrTbl['gene_A']=ctkrTbl['gene_A'].str.replace('|L', '')
-    ctkrTbl['gene_A']=ctkrTbl['gene_A'].str.replace('|R', '')
-    ctkrTbl['gene_B']=ctkrTbl['gene_B'].str.replace('|R', '')
-    ctkrTbl['gene_B']=ctkrTbl['gene_B'].str.replace('|TF', '')
-
-    ctkrTbl['allpair']=ctkrTbl['allpair'].str.replace('|R', '')
-    ctkrTbl['allpair']=ctkrTbl['allpair'].str.replace('|L', '')
-    ctkrTbl['allpair']=ctkrTbl['allpair'].str.replace('|TF', '')
-    return ctkrTbl
-
-
-
 #%%
 
 def equalizeScoresTables(ctrlTbl, expTbl, ctrlCondition, expCondition):
@@ -402,25 +369,6 @@ def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     return x_diff,adj
 
 #%%
-#def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
-#    ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
-#    pairsDir=[]
-#    for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
-#        for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
-#            pairsDir.append(ct+'->'+ct2)
-#    pairCatDFdir=pd.DataFrame(pairsDir, columns=['pairs'])
-    
-#    pairCatDFdir['colocCats']=''
-#    for clust in np.sort(coloc_clusts.unique()):
-#        #pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
-#        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
-
-#    for comb in list(itertools.permutations(list(niches.keys()), 2)):
-#        #pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
-#        pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
-
-#    return pairCatDFdir
-
 def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
     ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
     pairsDir=[]
@@ -431,11 +379,9 @@ def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
     
     pairCatDFdir['colocCats']=''
     for clust in np.sort(coloc_clusts.unique()):
-        #pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
-        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
-
+        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
+    
     for comb in list(itertools.permutations(list(niches.keys()), 2)):
-        #pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
         pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
 
     return pairCatDFdir

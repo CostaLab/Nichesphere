@@ -1,0 +1,352 @@
+[I 2024-12-17 11:26:54.464 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 11:26:54.466 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 11:26:54.469 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 11:26:54.597 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 11:26:54.606 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 11:26:54.607 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 11:26:54.608 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 11:26:54.609 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 11:26:54.609 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 11:26:54.609 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 11:26:54.631 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 11:26:54.631 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 11:26:54.631 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 11:26:54.631 ServerApp] http://localhost:8888/lab?token=c4ebb8f7af8a6952fa295bc2f304194e6295fb2312185879
+[I 2024-12-17 11:26:54.631 ServerApp]     http://127.0.0.1:8888/lab?token=c4ebb8f7af8a6952fa295bc2f304194e6295fb2312185879
+[I 2024-12-17 11:26:54.631 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 11:26:54.641 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1500654-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=c4ebb8f7af8a6952fa295bc2f304194e6295fb2312185879
+        http://127.0.0.1:8888/lab?token=c4ebb8f7af8a6952fa295bc2f304194e6295fb2312185879
+[I 2024-12-17 11:26:54.789 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 11:26:56.649 LabApp] Could not determine jupyterlab build status without nodejs
+[W 2024-12-17 11:26:56.865 ServerApp] 404 GET /api/contents/PICseq?content=0&hash=0&1734431216863 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.88ms referer=http://localhost:8888/lab
+[W 2024-12-17 11:26:56.865 ServerApp] 404 GET /api/contents/PICseq?content=0&hash=0&1734431216863 (127.0.0.1): No such file or directory: PICseq
+[W 2024-12-17 11:26:56.866 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734431216863 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.71ms referer=http://localhost:8888/lab
+[W 2024-12-17 11:26:56.866 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734431216863 (127.0.0.1): No such file or directory: PICseq/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:26:56.868 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734431216864 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.63ms referer=http://localhost:8888/lab
+[W 2024-12-17 11:26:56.868 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734431216864 (127.0.0.1): No such file or directory: PICseq/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:26:57.997 ServerApp] 404 GET /api/contents/PICseq?1734431217995 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.72ms referer=http://localhost:8888/lab
+[W 2024-12-17 11:26:57.997 ServerApp] 404 GET /api/contents/PICseq?1734431217995 (127.0.0.1): No such file or directory: PICseq
+[I 2024-12-17 11:27:24.553 ServerApp] Kernel started: f2184f13-caf3-40c7-ba5f-74c9d02a3ef7
+[I 2024-12-17 11:27:24.884 ServerApp] Connecting to kernel f2184f13-caf3-40c7-ba5f-74c9d02a3ef7.
+[I 2024-12-17 11:27:24.896 ServerApp] Connecting to kernel f2184f13-caf3-40c7-ba5f-74c9d02a3ef7.
+[I 2024-12-17 11:27:24.912 ServerApp] Connecting to kernel f2184f13-caf3-40c7-ba5f-74c9d02a3ef7.
+[W 2024-12-17 11:29:17.903 ServerApp] delete /Nichesphere_tutorial_PICseq.html
+[I 2024-12-17 11:29:17.906 ServerApp] Kernel shutdown: f2184f13-caf3-40c7-ba5f-74c9d02a3ef7
+[W 2024-12-17 11:29:19.736 ServerApp] delete /Nichesphere_tutorial_PICseq.ipynb
+[I 2024-12-17 11:32:17.476 ServerApp] Kernel started: c92c7b39-7096-48e3-bfc0-1d4596b6359d
+[I 2024-12-17 11:32:17.842 ServerApp] Connecting to kernel c92c7b39-7096-48e3-bfc0-1d4596b6359d.
+[I 2024-12-17 11:36:17.395 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:37:46.332 ServerApp] 404 GET /api/contents/data/PICseq_doublets_?content=0&hash=0&1734431866330 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.77ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:37:46.333 ServerApp] 404 GET /api/contents/data/PICseq_doublets_?content=0&hash=0&1734431866330 (127.0.0.1): No such file or directory: data/PICseq_doublets_
+[I 2024-12-17 11:38:17.649 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 11:40:19.111 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:40:19.628 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[W 2024-12-17 11:41:06.373 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432066371 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.81ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:41:06.373 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432066371 (127.0.0.1): No such file or directory: PICseq_crossTalker_newTbl_EV_1.csv
+[W 2024-12-17 11:41:06.411 ServerApp] 404 GET /api/contents/PICseq_crossTalker_tbl_EV_scSeqComm.csv?content=0&hash=0&1734432066408 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.88ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:41:06.411 ServerApp] 404 GET /api/contents/PICseq_crossTalker_tbl_EV_scSeqComm.csv?content=0&hash=0&1734432066408 (127.0.0.1): No such file or directory: PICseq_crossTalker_tbl_EV_scSeqComm.csv
+[W 2024-12-17 11:41:06.415 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432066413 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.80ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:41:06.415 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432066413 (127.0.0.1): No such file or directory: PICseq_crossTalker_newTbl_EV_1.csv
+[W 2024-12-17 11:42:07.760 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432127758 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.73ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:42:07.760 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432127758 (127.0.0.1): No such file or directory: PICseq_crossTalker_newTbl_EV_1.csv
+[W 2024-12-17 11:42:07.775 ServerApp] 404 GET /api/contents/PICseq_crossTalker_tbl_EV_scSeqComm.csv?content=0&hash=0&1734432127773 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.69ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:42:07.775 ServerApp] 404 GET /api/contents/PICseq_crossTalker_tbl_EV_scSeqComm.csv?content=0&hash=0&1734432127773 (127.0.0.1): No such file or directory: PICseq_crossTalker_tbl_EV_scSeqComm.csv
+[W 2024-12-17 11:42:07.778 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432127776 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.78ms referer=http://localhost:8888/lab/tree/tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:42:07.778 ServerApp] 404 GET /api/contents/PICseq_crossTalker_newTbl_EV_1.csv?content=0&hash=0&1734432127776 (127.0.0.1): No such file or directory: PICseq_crossTalker_newTbl_EV_1.csv
+[I 2024-12-17 11:42:19.688 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 11:44:19.856 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 11:45:38.026 ServerApp] Kernel restarted: c92c7b39-7096-48e3-bfc0-1d4596b6359d
+[I 2024-12-17 11:45:38.032 ServerApp] Starting buffering for c92c7b39-7096-48e3-bfc0-1d4596b6359d:b614c0d1-cd90-4c01-8907-1f0471ff8bae
+[I 2024-12-17 11:45:38.035 ServerApp] Connecting to kernel c92c7b39-7096-48e3-bfc0-1d4596b6359d.
+[I 2024-12-17 11:45:38.035 ServerApp] Restoring connection for c92c7b39-7096-48e3-bfc0-1d4596b6359d:b614c0d1-cd90-4c01-8907-1f0471ff8bae
+[I 2024-12-17 11:46:20.002 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 11:48:20.323 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 11:48:20.557 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 11:49:25.676 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 11:49:30.144 ServerApp] Kernel shutdown: c92c7b39-7096-48e3-bfc0-1d4596b6359d
+[I 2024-12-17 11:49:31.569 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-17 11:49:31.569 ServerApp] Shutting down 4 extensions
+[I 2024-12-17 15:56:32.317 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 15:56:32.320 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 15:56:32.322 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 15:56:32.442 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 15:56:32.451 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 15:56:32.452 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 15:56:32.452 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 15:56:32.453 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 15:56:32.453 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 15:56:32.453 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 15:56:32.474 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 15:56:32.475 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 15:56:32.475 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 15:56:32.475 ServerApp] http://localhost:8888/lab?token=2f1235fb0bea48b762eeb98442663430070728b5318c51ca
+[I 2024-12-17 15:56:32.475 ServerApp]     http://127.0.0.1:8888/lab?token=2f1235fb0bea48b762eeb98442663430070728b5318c51ca
+[I 2024-12-17 15:56:32.475 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 15:56:32.484 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1509543-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=2f1235fb0bea48b762eeb98442663430070728b5318c51ca
+        http://127.0.0.1:8888/lab?token=2f1235fb0bea48b762eeb98442663430070728b5318c51ca
+[I 2024-12-17 15:56:32.643 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 15:56:34.857 LabApp] Could not determine jupyterlab build status without nodejs
+[W 2024-12-17 15:56:35.082 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734447395079 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.72ms referer=http://localhost:8888/lab
+[W 2024-12-17 15:56:35.082 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734447395079 (127.0.0.1): No such file or directory: Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 15:56:35.083 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734447395080 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.53ms referer=http://localhost:8888/lab
+[W 2024-12-17 15:56:35.083 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734447395080 (127.0.0.1): No such file or directory: Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 15:57:03.883 ServerApp] Kernel started: e03dee2d-f37f-46aa-905c-76d370549091
+[I 2024-12-17 15:57:04.251 ServerApp] Connecting to kernel e03dee2d-f37f-46aa-905c-76d370549091.
+[I 2024-12-17 15:57:04.264 ServerApp] Connecting to kernel e03dee2d-f37f-46aa-905c-76d370549091.
+[I 2024-12-17 15:57:04.279 ServerApp] Connecting to kernel e03dee2d-f37f-46aa-905c-76d370549091.
+[I 2024-12-17 15:59:03.686 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:01:04.028 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:03:04.259 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:05:04.467 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:05:05.650 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:13:05.738 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:15:06.242 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:19:06.537 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:23:06.778 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:23:07.864 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:25:07.942 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:27:09.028 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:27:10.004 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:29:10.096 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:29:10.665 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:35:10.764 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:37:10.994 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:37:12.176 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:38:53.497 ServerApp] Kernel restarted: e03dee2d-f37f-46aa-905c-76d370549091
+[I 2024-12-17 16:38:53.501 ServerApp] Starting buffering for e03dee2d-f37f-46aa-905c-76d370549091:37fece2e-2c0e-420e-a6a6-74bd3daf7777
+[I 2024-12-17 16:38:53.503 ServerApp] Connecting to kernel e03dee2d-f37f-46aa-905c-76d370549091.
+[I 2024-12-17 16:38:53.503 ServerApp] Restoring connection for e03dee2d-f37f-46aa-905c-76d370549091:37fece2e-2c0e-420e-a6a6-74bd3daf7777
+[I 2024-12-17 16:39:12.251 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:40:37.872 ServerApp] Kernel restarted: e03dee2d-f37f-46aa-905c-76d370549091
+[I 2024-12-17 16:40:37.900 ServerApp] Starting buffering for e03dee2d-f37f-46aa-905c-76d370549091:37fece2e-2c0e-420e-a6a6-74bd3daf7777
+[I 2024-12-17 16:40:37.902 ServerApp] Connecting to kernel e03dee2d-f37f-46aa-905c-76d370549091.
+[I 2024-12-17 16:40:37.902 ServerApp] Restoring connection for e03dee2d-f37f-46aa-905c-76d370549091:37fece2e-2c0e-420e-a6a6-74bd3daf7777
+[I 2024-12-17 16:41:12.481 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:41:13.158 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:43:13.229 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 16:43:13.847 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 16:47:13.927 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:49:14.243 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:51:14.471 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:53:14.865 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:54:11.928 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 16:54:21.283 ServerApp] Kernel shutdown: e03dee2d-f37f-46aa-905c-76d370549091
+[I 2024-12-17 16:54:22.821 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-17 16:54:22.822 ServerApp] Shutting down 4 extensions
+[I 2024-12-17 16:57:08.425 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 16:57:08.428 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 16:57:08.430 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 16:57:08.556 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 16:57:08.565 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 16:57:08.567 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 16:57:08.567 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 16:57:08.568 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 16:57:08.568 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 16:57:08.568 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 16:57:08.590 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 16:57:08.590 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 16:57:08.590 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 16:57:08.590 ServerApp] http://localhost:8888/lab?token=d5a74855d0d2a2e605485636eeca36739f7756a07a1c5c8a
+[I 2024-12-17 16:57:08.590 ServerApp]     http://127.0.0.1:8888/lab?token=d5a74855d0d2a2e605485636eeca36739f7756a07a1c5c8a
+[I 2024-12-17 16:57:08.590 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 16:57:08.600 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1513107-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=d5a74855d0d2a2e605485636eeca36739f7756a07a1c5c8a
+        http://127.0.0.1:8888/lab?token=d5a74855d0d2a2e605485636eeca36739f7756a07a1c5c8a
+[I 2024-12-17 16:57:08.759 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 16:57:10.545 LabApp] Could not determine jupyterlab build status without nodejs
+[I 2024-12-17 16:57:11.351 ServerApp] Kernel started: 085b3413-38bc-4ec9-b184-5a869ee28616
+[I 2024-12-17 16:57:11.710 ServerApp] Connecting to kernel 085b3413-38bc-4ec9-b184-5a869ee28616.
+[I 2024-12-17 16:57:11.728 ServerApp] Connecting to kernel 085b3413-38bc-4ec9-b184-5a869ee28616.
+[I 2024-12-17 16:57:11.741 ServerApp] Connecting to kernel 085b3413-38bc-4ec9-b184-5a869ee28616.
+[I 2024-12-17 16:59:11.191 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:01:11.398 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 17:01:11.572 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-17 17:03:39.999 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:03:43.310 ServerApp] Kernel shutdown: 085b3413-38bc-4ec9-b184-5a869ee28616
+[I 2024-12-17 17:03:44.434 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-17 17:03:44.434 ServerApp] Shutting down 4 extensions
+[I 2024-12-17 17:14:41.202 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 17:14:41.204 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 17:14:41.206 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 17:14:41.322 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 17:14:41.330 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 17:14:41.331 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 17:14:41.332 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 17:14:41.332 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 17:14:41.333 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 17:14:41.333 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 17:14:41.353 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 17:14:41.353 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 17:14:41.353 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 17:14:41.353 ServerApp] http://localhost:8888/lab?token=bd9d2493ded8ea7cb69e4f82f04f6e2c6b992f10932cb05b
+[I 2024-12-17 17:14:41.353 ServerApp]     http://127.0.0.1:8888/lab?token=bd9d2493ded8ea7cb69e4f82f04f6e2c6b992f10932cb05b
+[I 2024-12-17 17:14:41.353 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 17:14:41.363 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1514310-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=bd9d2493ded8ea7cb69e4f82f04f6e2c6b992f10932cb05b
+        http://127.0.0.1:8888/lab?token=bd9d2493ded8ea7cb69e4f82f04f6e2c6b992f10932cb05b
+[I 2024-12-17 17:14:41.521 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 17:14:43.377 LabApp] Could not determine jupyterlab build status without nodejs
+[W 2024-12-17 17:14:43.589 ServerApp] 404 GET /api/contents/doublet_analysis_clean.ipynb?content=0&hash=0&1734452083586 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.77ms referer=http://localhost:8888/lab
+[W 2024-12-17 17:14:43.589 ServerApp] 404 GET /api/contents/doublet_analysis_clean.ipynb?content=0&hash=0&1734452083586 (127.0.0.1): No such file or directory: doublet_analysis_clean.ipynb
+[W 2024-12-17 17:14:43.590 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734452083586 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.77ms referer=http://localhost:8888/lab
+[W 2024-12-17 17:14:43.590 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734452083586 (127.0.0.1): No such file or directory: Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 17:14:43.590 ServerApp] 404 GET /api/contents/doublet_analysis_clean.ipynb?content=0&hash=0&1734452083587 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 1.09ms referer=http://localhost:8888/lab
+[W 2024-12-17 17:14:43.590 ServerApp] 404 GET /api/contents/doublet_analysis_clean.ipynb?content=0&hash=0&1734452083587 (127.0.0.1): No such file or directory: doublet_analysis_clean.ipynb
+[W 2024-12-17 17:14:43.591 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734452083588 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.54ms referer=http://localhost:8888/lab
+[W 2024-12-17 17:14:43.591 ServerApp] 404 GET /api/contents/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734452083588 (127.0.0.1): No such file or directory: Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:14:49.085 ServerApp] Kernel started: c7728986-213f-4973-893d-56aaf61281df
+[I 2024-12-17 17:14:49.731 ServerApp] Connecting to kernel c7728986-213f-4973-893d-56aaf61281df.
+[I 2024-12-17 17:14:49.744 ServerApp] Connecting to kernel c7728986-213f-4973-893d-56aaf61281df.
+[I 2024-12-17 17:14:49.760 ServerApp] Connecting to kernel c7728986-213f-4973-893d-56aaf61281df.
+[I 2024-12-17 17:16:48.931 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:18:49.143 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:20:49.328 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:22:49.531 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:25:26.609 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:25:31.022 ServerApp] Kernel restarted: c7728986-213f-4973-893d-56aaf61281df
+[I 2024-12-17 17:25:31.027 ServerApp] Starting buffering for c7728986-213f-4973-893d-56aaf61281df:80ecff22-0e24-46a1-91f1-dd2138c77b01
+[I 2024-12-17 17:25:31.029 ServerApp] Connecting to kernel c7728986-213f-4973-893d-56aaf61281df.
+[I 2024-12-17 17:25:31.029 ServerApp] Restoring connection for c7728986-213f-4973-893d-56aaf61281df:80ecff22-0e24-46a1-91f1-dd2138c77b01
+[I 2024-12-17 17:26:49.730 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-17 17:28:47.110 ServerApp] delete /tests/figures/colocFilt_commNW_apoptosis.pdf
+[W 2024-12-17 17:28:47.115 ServerApp] delete /tests/figures/nwStats_ECMglycoprots.pdf
+[W 2024-12-17 17:28:47.117 ServerApp] delete /tests/figures/nwStats_phagocytosis.pdf
+[W 2024-12-17 17:28:47.118 ServerApp] delete /tests/figures/colocFilt_commNW_Collagens.pdf
+[W 2024-12-17 17:28:47.119 ServerApp] delete /tests/figures/colocFilt_commNW_Cytokine.pdf
+[W 2024-12-17 17:28:47.120 ServerApp] delete /tests/figures/colocFilt_commNW_ECMaffiliated.pdf
+[W 2024-12-17 17:28:47.121 ServerApp] delete /tests/figures/colocFilt_commNW_ECMglycoprots.pdf
+[W 2024-12-17 17:28:47.123 ServerApp] delete /tests/figures/colocFilt_commNW_SecretedFactors.pdf
+[W 2024-12-17 17:28:47.125 ServerApp] delete /tests/figures/colocFiltereddiffComm_colocClusts_categories_4clusts_phagocyt_death.pdf
+[W 2024-12-17 17:28:47.126 ServerApp] delete /tests/figures/diffColocNW_stats.pdf
+[W 2024-12-17 17:28:47.127 ServerApp] delete /tests/figures/diffColocNW_TPO_4adjClusts.pdf
+[W 2024-12-17 17:28:47.128 ServerApp] delete /tests/figures/diffColocNW_TPO_4adjClusts.png
+[W 2024-12-17 17:28:47.129 ServerApp] delete /tests/figures/colocFilt_commNW_phagocytosis.pdf
+[W 2024-12-17 17:28:47.131 ServerApp] delete /tests/figures/Il1b_expression_perCondition_singlets.pdf
+[W 2024-12-17 17:28:47.132 ServerApp] delete /tests/figures/Mpl_expression_perCondition_singlets.pdf
+[W 2024-12-17 17:28:47.133 ServerApp] delete /tests/figures/nwStats_apoptosis.pdf
+[W 2024-12-17 17:28:47.133 ServerApp] delete /tests/figures/nwStats_Collagens.pdf
+[W 2024-12-17 17:28:47.134 ServerApp] delete /tests/figures/nwStats_Cytokine.pdf
+[W 2024-12-17 17:28:47.135 ServerApp] delete /tests/figures/nwStats_ECMaffiliated.pdf
+[W 2024-12-17 17:28:47.137 ServerApp] delete /tests/figures/nwStats_SecretedFactors.pdf
+[W 2024-12-17 17:28:47.138 ServerApp] delete /tests/figures/OvsE_TPO_clustered.pdf
+[W 2024-12-17 17:28:47.139 ServerApp] delete /tests/figures/OvsE_TPO.png
+[W 2024-12-17 17:28:47.140 ServerApp] delete /tests/figures/randomDoubletsOEratiosDist.pdf
+[W 2024-12-17 17:28:47.141 ServerApp] delete /tests/figures/Thpo_expression_perCondition_singlets.pdf
+[W 2024-12-17 17:28:47.143 ServerApp] delete /tests/figures/violin_doubletsQC.pdf
+[W 2024-12-17 17:28:47.144 ServerApp] delete /tests/figures/violin_singletsQC.pdf
+[W 2024-12-17 17:28:47.145 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/figures/violin_singletsQC.pdf doesn't exist
+[W 2024-12-17 17:28:47.145 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/figures/violin_doubletsQC.pdf doesn't exist
+[I 2024-12-17 17:28:49.862 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:28:55.888 ServerApp] Kernel restarted: c7728986-213f-4973-893d-56aaf61281df
+[I 2024-12-17 17:28:55.891 ServerApp] Starting buffering for c7728986-213f-4973-893d-56aaf61281df:80ecff22-0e24-46a1-91f1-dd2138c77b01
+[I 2024-12-17 17:28:55.893 ServerApp] Connecting to kernel c7728986-213f-4973-893d-56aaf61281df.
+[I 2024-12-17 17:28:55.893 ServerApp] Restoring connection for c7728986-213f-4973-893d-56aaf61281df:80ecff22-0e24-46a1-91f1-dd2138c77b01
+[I 2024-12-17 17:30:50.847 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:53:45.779 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 17:53:47.741 ServerApp] Kernel shutdown: c7728986-213f-4973-893d-56aaf61281df
+[I 2024-12-17 17:53:48.582 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-17 17:53:48.582 ServerApp] Shutting down 4 extensions
+[I 2024-12-17 17:59:42.297 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 17:59:42.299 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 17:59:42.302 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 17:59:42.418 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 17:59:42.426 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 17:59:42.428 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 17:59:42.428 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 17:59:42.429 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 17:59:42.429 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 17:59:42.429 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 17:59:42.450 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 17:59:42.451 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 17:59:42.451 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 17:59:42.451 ServerApp] http://localhost:8888/lab?token=c899c545064c4fe0dfea0b241a28ad5174a515e2f7735a45
+[I 2024-12-17 17:59:42.451 ServerApp]     http://127.0.0.1:8888/lab?token=c899c545064c4fe0dfea0b241a28ad5174a515e2f7735a45
+[I 2024-12-17 17:59:42.451 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 17:59:42.460 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1516056-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=c899c545064c4fe0dfea0b241a28ad5174a515e2f7735a45
+        http://127.0.0.1:8888/lab?token=c899c545064c4fe0dfea0b241a28ad5174a515e2f7735a45
+[I 2024-12-17 17:59:42.638 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 17:59:44.305 LabApp] Could not determine jupyterlab build status without nodejs
+[I 2024-12-17 17:59:45.035 ServerApp] Kernel started: 3a06c6c6-5652-466c-a092-b6e0a0e8d72c
+[I 2024-12-17 17:59:45.358 ServerApp] Connecting to kernel 3a06c6c6-5652-466c-a092-b6e0a0e8d72c.
+[I 2024-12-17 17:59:45.376 ServerApp] Connecting to kernel 3a06c6c6-5652-466c-a092-b6e0a0e8d72c.
+[I 2024-12-17 17:59:45.393 ServerApp] Connecting to kernel 3a06c6c6-5652-466c-a092-b6e0a0e8d72c.
+[I 2024-12-17 18:01:44.894 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:01:53.166 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:01:56.651 ServerApp] Kernel restarted: 3a06c6c6-5652-466c-a092-b6e0a0e8d72c
+[I 2024-12-17 18:01:56.653 ServerApp] Starting buffering for 3a06c6c6-5652-466c-a092-b6e0a0e8d72c:a89de4df-9d50-4e60-a157-2c51919d9fd0
+[I 2024-12-17 18:01:56.655 ServerApp] Connecting to kernel 3a06c6c6-5652-466c-a092-b6e0a0e8d72c.
+[I 2024-12-17 18:01:56.655 ServerApp] Restoring connection for 3a06c6c6-5652-466c-a092-b6e0a0e8d72c:a89de4df-9d50-4e60-a157-2c51919d9fd0
+[W 2024-12-17 18:02:32.176 ServerApp] 404 GET /api/contents/data/allDBs.csv?content=0&hash=0&1734454952173 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.93ms referer=http://localhost:8888/lab
+[W 2024-12-17 18:02:32.176 ServerApp] 404 GET /api/contents/data/allDBs.csv?content=0&hash=0&1734454952173 (127.0.0.1): No such file or directory: data/allDBs.csv
+[W 2024-12-17 18:02:32.186 ServerApp] 404 GET /api/contents/data/allDBs.csv?content=0&hash=0&1734454952184 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.65ms referer=http://localhost:8888/lab
+[W 2024-12-17 18:02:32.186 ServerApp] 404 GET /api/contents/data/allDBs.csv?content=0&hash=0&1734454952184 (127.0.0.1): No such file or directory: data/allDBs.csv
+[I 2024-12-17 18:02:57.099 ServerApp] Kernel restarted: 3a06c6c6-5652-466c-a092-b6e0a0e8d72c
+[I 2024-12-17 18:02:57.105 ServerApp] Starting buffering for 3a06c6c6-5652-466c-a092-b6e0a0e8d72c:a89de4df-9d50-4e60-a157-2c51919d9fd0
+[I 2024-12-17 18:02:57.111 ServerApp] Connecting to kernel 3a06c6c6-5652-466c-a092-b6e0a0e8d72c.
+[I 2024-12-17 18:02:57.111 ServerApp] Restoring connection for 3a06c6c6-5652-466c-a092-b6e0a0e8d72c:a89de4df-9d50-4e60-a157-2c51919d9fd0
+[I 2024-12-17 18:03:45.066 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:05:05.462 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:05:15.755 ServerApp] Kernel shutdown: 3a06c6c6-5652-466c-a092-b6e0a0e8d72c
+[I 2024-12-17 18:05:16.700 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-17 18:05:16.700 ServerApp] Shutting down 4 extensions
+[I 2024-12-17 18:08:55.034 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 18:08:55.036 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 18:08:55.039 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 18:08:55.153 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 18:08:55.161 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 18:08:55.162 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 18:08:55.162 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 18:08:55.163 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 18:08:55.163 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 18:08:55.163 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 18:08:55.183 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 18:08:55.184 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 18:08:55.184 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 18:08:55.184 ServerApp] http://localhost:8888/lab?token=de95ebeddfa8fd06e70c328b8b26cf94a34bd076e4b791a5
+[I 2024-12-17 18:08:55.184 ServerApp]     http://127.0.0.1:8888/lab?token=de95ebeddfa8fd06e70c328b8b26cf94a34bd076e4b791a5
+[I 2024-12-17 18:08:55.184 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 18:08:55.193 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1516684-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=de95ebeddfa8fd06e70c328b8b26cf94a34bd076e4b791a5
+        http://127.0.0.1:8888/lab?token=de95ebeddfa8fd06e70c328b8b26cf94a34bd076e4b791a5
+[I 2024-12-17 18:08:55.356 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 18:08:57.272 LabApp] Could not determine jupyterlab build status without nodejs
+[I 2024-12-17 18:08:58.002 ServerApp] Kernel started: 63b8c7a7-e25d-435a-87c2-98fae556e299
+[I 2024-12-17 18:08:58.372 ServerApp] Connecting to kernel 63b8c7a7-e25d-435a-87c2-98fae556e299.
+[I 2024-12-17 18:08:58.386 ServerApp] Connecting to kernel 63b8c7a7-e25d-435a-87c2-98fae556e299.
+[I 2024-12-17 18:08:58.400 ServerApp] Connecting to kernel 63b8c7a7-e25d-435a-87c2-98fae556e299.
+[W 2024-12-17 18:08:58.480 ServerApp] Got events for closed stream <zmq.eventloop.zmqstream.ZMQStream object at 0x7f45f023cb80>
+[W 2024-12-17 18:09:19.000 ServerApp] 404 GET /api/contents/tests/figures?content=1&hash=0&1734455358998 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.70ms referer=http://localhost:8888/lab
+[W 2024-12-17 18:09:19.001 ServerApp] 404 GET /api/contents/tests/figures?content=1&hash=0&1734455358998 (127.0.0.1): No such file or directory: tests/figures
+[I 2024-12-17 18:10:57.863 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:11:07.301 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:13:01.651 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:13:06.788 ServerApp] Kernel shutdown: 63b8c7a7-e25d-435a-87c2-98fae556e299
+[I 2024-12-17 18:13:07.711 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-17 18:13:07.712 ServerApp] Shutting down 4 extensions

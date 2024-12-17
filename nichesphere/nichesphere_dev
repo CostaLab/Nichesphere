@@ -1,0 +1,42 @@
+cd source/Nichesphere/nichesphere/
+
+conda create -n nichesphere_dev_env python=3.10
+
+conda activate nichesphere_dev_env
+
+pip install poetry
+
+poetry init
+
+conda install -c conda-forge pygraphviz
+
+conda install -c conda-forge jupyterlab
+
+## pip dependencies
+poetry add scanpy leidenalg
+
+poetry lock
+
+conda env export | grep -v "^prefix: " > environment.yml
+
+# Clean file, just with 
+#environment.yml
+#name: nichesphenv
+#channels:
+#  - conda-forge
+#  - defaults
+#dependencies:
+#  - graphviz=12.0.0=hba01fac_0
+#  - jupyterlab=4.3.3=pyhd8ed1ab_0
+#  - pygraphviz=1.14=py310h9a1d609_0
+#  - python=3.10.16=he725a3c_1_cpython
+#  - pip:
+#        - poetry==1.8.5
+
+conda env create -f environment.yml
+
+conda activate nichesphenv
+
+poetry install
+
+
