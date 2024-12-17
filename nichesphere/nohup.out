@@ -350,3 +350,34 @@
 [I 2024-12-17 18:13:06.788 ServerApp] Kernel shutdown: 63b8c7a7-e25d-435a-87c2-98fae556e299
 [I 2024-12-17 18:13:07.711 ServerApp] Shutting down on /api/shutdown request.
 [I 2024-12-17 18:13:07.712 ServerApp] Shutting down 4 extensions
+[I 2024-12-17 18:44:44.848 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-17 18:44:44.850 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-17 18:44:44.853 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-17 18:44:44.967 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-17 18:44:44.975 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-17 18:44:44.977 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-17 18:44:44.977 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-17 18:44:44.978 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-17 18:44:44.978 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-17 18:44:44.978 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-17 18:44:44.999 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-17 18:44:44.999 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-17 18:44:44.999 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-17 18:44:44.999 ServerApp] http://localhost:8888/lab?token=137bf11eba54f2b04ef6b344f3883cef9a04b16b756e5172
+[I 2024-12-17 18:44:44.999 ServerApp]     http://127.0.0.1:8888/lab?token=137bf11eba54f2b04ef6b344f3883cef9a04b16b756e5172
+[I 2024-12-17 18:44:44.999 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-17 18:44:45.009 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1519104-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=137bf11eba54f2b04ef6b344f3883cef9a04b16b756e5172
+        http://127.0.0.1:8888/lab?token=137bf11eba54f2b04ef6b344f3883cef9a04b16b756e5172
+[I 2024-12-17 18:44:45.167 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-17 18:44:47.291 LabApp] Could not determine jupyterlab build status without nodejs
+[I 2024-12-17 18:44:47.994 ServerApp] Kernel started: a0ecd24c-e877-4442-8532-591b1d95f211
+[I 2024-12-17 18:44:48.358 ServerApp] Connecting to kernel a0ecd24c-e877-4442-8532-591b1d95f211.
+[I 2024-12-17 18:44:48.376 ServerApp] Connecting to kernel a0ecd24c-e877-4442-8532-591b1d95f211.
+[I 2024-12-17 18:44:48.388 ServerApp] Connecting to kernel a0ecd24c-e877-4442-8532-591b1d95f211.
+[I 2024-12-17 18:46:47.855 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-17 18:46:48.106 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
