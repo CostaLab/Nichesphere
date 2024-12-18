@@ -1,34 +1,17 @@
 # %%
-import scanpy as sc
 import pandas as pd
 import numpy as np
 import scipy
 import seaborn as sns
-import glob
 import random
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
 import ot
 import networkx as nx
-import statsmodels
-import logging
-#import novosparc
-#import anndata
 import itertools
 import sklearn
 
-from scipy.sparse import csc_matrix
-
-from numpy import ndarray
-
-#from statsmodels import stats
-
 from matplotlib.colors import ListedColormap
-
-#logger_name = 'spacemake.spatial.novosparc_integration'
-#logger = logging.getLogger(logger_name)
 
 # Choose colormap
 cmap = plt.cm.Blues
@@ -136,16 +119,9 @@ def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=
     for x in sampleCTprops.index: 
         nks[x]=np.round(sampleCTprops[x]*ns[sample])
     
-    #for ct in cts:
-    #    cells_prior[list(sc_adata.obs[ct_col]==ct)]=((p*nks[ct]/nk[ct])+(((1-p)*ns[sample])/n))/ns[sample]
-
-    #for ct in cts:
-    #    cells_prior[list((sc_adata.obs[sample_col]==sample) & (sc_adata.obs[ct_col]==ct))]=(nks[ct]/nk[ct])/(ns[sample]*ns[sample]/n)
-    #    cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(ns[sample]/n)/(ns[sample]*(n-ns[sample])/n)
  
     for ct in cts:
         cells_prior[list((sc_adata.obs[sample_col]==sample) & (sc_adata.obs[ct_col]==ct))]=p*nks[ct]/(nks[ct]*ns[sample])
-        #cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(1-p)*(ns[sample]/n)/((n-ns[sample])*ns[sample]/n)
         cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(1-p)/(n-ns[sample])
     
     return cells_prior
@@ -161,17 +137,14 @@ def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
     
     pairCatDFdir['colocCats']=''
     for clust in np.sort(coloc_clusts.unique()):
-        #pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=list(niches.keys())[clust]+'->'+list(niches.keys())[clust]
         pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
 
     for comb in list(itertools.permutations(list(niches.keys()), 2)):
-        #pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
         pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
 
     return pairCatDFdir
 # %%
 ## w good for PIC and new data
-#def getColocProbs(filesList, filePrefix, nCellTypes):
 def getColocProbs(CTprobs, spotSamples):
     """ Get colocalisation probabilities (sum across spots of probabilities of each cell type pair being in the same spot) 
     #filesList=list of mapping anndata files 
@@ -181,29 +154,21 @@ def getColocProbs(CTprobs, spotSamples):
     nCellTypes=number of cell types.
     Returns concatenated single sample matrices of celltype x cell type"""
     CTcolocalizationP=pd.DataFrame()
-    #for file in filesList:
+    
     for smple in spotSamples.unique():
     
-        #sample=file.replace(filePrefix, "")
-        #sample=sample.replace(".h5ad", "")
-    
-        #testAdata = sc.read(file)
-        #test=testAdata.obs.iloc[:,0:nCellTypes]
         test=CTprobs.loc[spotSamples.index[spotSamples==smple]]
         CTcoloc_P = pd.DataFrame()
         i=0
         for ct in test.columns:
-            ##w=pd.DataFrame([test[ct]*test[col]*len(test.index) for col in test.iloc[:,0:nCellTypes].columns], index=test.iloc[:,0:nCellTypes].columns).sum(axis=1)
-            #w=pd.DataFrame([test[ct]*test[col]/len(test.index) for col in test.iloc[:,0:nCellTypes].columns], index=test.iloc[:,0:nCellTypes].columns).sum(axis=1)
             w=pd.DataFrame([test[ct]*test[col]/len(test.index) for col in test.columns], index=test.columns).sum(axis=1)
             CTcoloc_P = pd.concat([CTcoloc_P, w], axis=1)
             i=i+1
-        #CTcoloc_P.columns=test.iloc[:,0:nCellTypes].columns
+        
         CTcoloc_P.columns=test.columns
         CTcoloc_P["sample"]=smple
         CTcolocalizationP = pd.concat([CTcolocalizationP, CTcoloc_P])
     
-    #CTcolocalizationPnorm.to_csv("./CTcolocalizationProbs_NS_wPrior.csv")
     return CTcolocalizationP
 
 # %%
@@ -242,7 +207,7 @@ def cellCatContained(pair, cellCat):
     a list (category)
     pair=evaluated cell type pair
     cellCat=category as a list of cell types"""
-    #contained=[pair.contains(cellType) for cellType in cellCat]
+    
     contained=[cellType in pair for cellType in cellCat]
     return True in contained
 # %%
@@ -258,15 +223,12 @@ def cells_niche_colors(CTs, niche_colors, niche_dict):
 
 
 # %%
-def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol, CTpairSep):
+def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol):
     """Get cell communication scores per cell type pair per LR pair by summing that LR pair scores for that cell type pair. 
     ccommTable=crossTalkeR results table (single condition)
     LRscoresCol=scores column in the crossTalkeR table
     CTpairSep=pattern separating cell type x from cell type y in pair name"""
     
-    #ccommTable['allpair']=ccommTable['allpair'].str.replace('|R', '')
-    #ccommTable['allpair']=ccommTable['allpair'].str.replace('|L', '')
-    #ccommTable['allpair']=ccommTable['allpair'].str.replace('|TF', '')
    
     scores = ccommTable[LRscoresCol].groupby(ccommTable['allpair']).sum()
     return scores
@@ -279,8 +241,7 @@ def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchC
     CTpairScores_byCat=pd.DataFrame()
     for cat in db[dbCatCol].unique():    
     
-        ccommScores_plt=pd.DataFrame(calculate_LR_CT_pair_scores_dir(ccommTable=ccommTable[[x in db[dbMatchCol][db[dbCatCol]==cat].tolist() for x in ccommTable[ccommMatchCol].str.lower().tolist()]], LRscoresCol=ccommLRscoresCol, CTpairSep='@'))
-        #ccommScores_plt=ccommScores_plt[np.setdiff1d(ccommScores_plt.index, oneCTinteractions)]
+        ccommScores_plt=pd.DataFrame(calculate_LR_CT_pair_scores_dir(ccommTable=ccommTable[[x in db[dbMatchCol][db[dbCatCol]==cat].tolist() for x in ccommTable[ccommMatchCol].str.lower().tolist()]], LRscoresCol=ccommLRscoresCol))
         
         ct1=[x[0] for x in ccommScores_plt.index.str.split('/')]
         ct2=[x[1].split('@')[1] for x in ccommScores_plt.index.str.split('/')]
@@ -291,6 +252,7 @@ def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchC
         boxplotDF['LRscores']=ccommScores_plt[ccommLRscoresCol]
         boxplotDF['LRcat']=cat
         CTpairScores_byCat=pd.concat([CTpairScores_byCat, boxplotDF])
+    
     CTpairScores_byCat['condition']=condition
         
     return CTpairScores_byCat
@@ -349,11 +311,9 @@ def plotDiffCcommStatsHM(diffCommTable, min_pval):
     x_hm.columns=diffCommTable.cellCat.unique()
     x_hm.index=diffCommTable.LRcat.unique()
     ## Plot heatmap
-    sns.set(font_scale=1.5)
+    sns.set_theme(font_scale=1.5)
     plot=sns.clustermap(x_hm, cmap='vlag', center=0)
-    #plot.set_yticklabels(rotation=90)
     plt.setp(plot.ax_heatmap.yaxis.get_majorticklabels(), rotation=1)
-    #plt.show()
     return x_hm, plot
 #%%
 
@@ -406,8 +366,6 @@ def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     x_diff.columns=unique([x.split('->')[0] for x in pairCatDF.pairs])
     x_diff.index=unique([x.split('->')[0] for x in pairCatDF.pairs])
     
-    
-    #x_diff=x_diff.loc[x_diff.index!='prolif',x_diff.columns!='prolif']
 
     ##Cosine similarity plus pseudocount
     adj=pd.DataFrame(sklearn.metrics.pairwise.cosine_similarity(x_diff)+1)
@@ -447,10 +405,7 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
     else:
         cgroup_cmap=clist
     
-    #x_diff,adj=getAdj_coloc(diffColocDF=diffColocDF, pairCatDF=pairCatDF, ncells=ncells)
-    
     gCol=nx.from_pandas_adjacency(adj, create_using=nx.Graph)
-    #pos = nx.spring_layout(gCol, k=1.5)
 
     ## Edge thickness (NEW)
     for x in list(gCol.edges):
@@ -473,24 +428,16 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
     blue_edges = [(u,v) for u,v in gCol.edges if edgeCols[u+'->'+v] == 'lightblue']
 
     #normalised scores
-    #inter=np.abs(pd.Series(list(weights))/pd.Series(list(weights)).max())
     inter=pd.Series(np.abs(pd.Series(list(weights))))
     inter.index=edgeCols.index
     inter[edgeCols=='lightblue']=inter[edgeCols=='lightblue']/np.max(inter[edgeCols=='lightblue'])
     inter[edgeCols=='orange']=inter[edgeCols=='orange']/np.max(inter[edgeCols=='orange'])
     pos = nx.drawing.nx_agraph.graphviz_layout(gCol,prog='neato')
-    #for key in colocDists.columns:
-    #    pos[key]=hitDist_transform.loc[key].to_numpy()
 
     ## Label positions
     pos_attrs = {}
     for node, coords in pos.items():
         pos_attrs[node] = (coords[0], coords[1]+9)
-    
-    ## edge color intensity by weight
-    #edcol = nx.get_edge_attributes(gCol,'weight')
-    #edcol = pd.Series(list(edcol.values())/np.max(list(edcol.values())))
-    #edcol.index=edgeCols.index
     
     f,ax1 = plt.subplots(1,1,figsize=(8,8),dpi=100) 
 
@@ -500,7 +447,6 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
         #npg = nx.pagerank(gCol,max_iter=1000, weight=None)
         npg = nx.betweenness_centrality(gCol)
         npg=list(npg.values())
-        #nx.draw_networkx_nodes(gCol,pos,node_size=1000*((npg-np.min(npg))/(np.max(npg)-np.min(npg))+1e-5),
         nx.draw_networkx_nodes(gCol,pos,node_size=50+1000*((npg)/(np.max(npg))),
             node_color=color_group,ax=ax1)
     else:
@@ -513,13 +459,6 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
         connectionstyle="arc3,rad=0.15",
         width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap4 , edge_vmin=-1, edge_vmax=1)
     nx.draw_networkx_labels(gCol,pos_attrs, font_size=12, font_weight='bold', clip_on=False,ax=ax1)
-    #nx.draw_networkx_labels(gCol,pos_attrs,verticalalignment='bottom',
-    #    font_size=12,clip_on=False,ax=ax1)
-    
-    #sm = plt.cm.ScalarMappable(cmap=cmap4, norm=plt.Normalize(vmin = -1, vmax=1))
-    #sm = plt.cm.ScalarMappable(cmap=cmap4)
-    #sm._A = []
-    #plt.colorbar(sm, ax=ax1)
 
     sm = plt.cm.ScalarMappable(cmap=cmap4)
     sm._A = []
@@ -533,11 +472,7 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
     x=plt.colorbar(sm, ax=cax, fraction=0.2)
     x.set_label('normalised diffColoc. score', rotation=270, labelpad=15, size=10, weight='normal')
     x.solids.set(alpha=0.3)
-    #plt.axis('off')
     
-    #ax1.set_title(f'RepresentativeCCI_{idc}:{nt}')
-    #ax1.savefig('figures/colocNW.pdf')
-    #ax1.axis('off')
     return gCol
 
 #%%
@@ -607,9 +542,6 @@ def catNW(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=
     orange_edges = [(u,v) for u,v in G.edges if edgeCols[u+'->'+v] == 'orange']
     blue_edges = [(u,v) for u,v in G.edges if edgeCols[u+'->'+v] == 'lightblue']
     
-    #inter=pd.Series(list(weights))/pd.Series(list(weights)).max()
-    #inter.index=edgeCols.index
-
     inter=pd.Series(np.abs(pd.Series(list(weights))))
     inter.index=edgeCols.index
     inter[edgeCols=='lightblue']=inter[edgeCols=='lightblue']/np.max(inter[edgeCols=='lightblue'])
@@ -622,54 +554,52 @@ def catNW(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=
     for node, coords in pos.items():
         pos_attrs[node] = (coords[0], coords[1]+7)
     
-    ## edge color intensity by weight 
-    
-    #edcol = nx.get_edge_attributes(G,'weight')
-    #edcol = pd.Series(list(edcol.values())/np.max(list(edcol.values())))
-    #edcol.index=edgeCols.index
-    
     ###
+
 
     to_remove=[(a,b) for a, b, attrs in G.edges(data=True) if attrs["weight"] == 0]
     G.remove_edges_from(to_remove)
     f,ax1 = plt.subplots(1,1,figsize=(8,8),dpi=100) 
-    #if PGsizedNodes == True:
-    #    ## pagerank sized nodes
-    #    npg = nx.pagerank(G,max_iter=1000, weight=None)
-    #    npg=list(npg.values())
-    #    #nx.draw_networkx_nodes(G,pos,node_size=1000*((npg-np.min(npg))/(np.max(npg)-np.min(npg))+1e-5),
-    #    nx.draw_networkx_nodes(G,pos,node_size=1000*((npg)/(np.max(npg))),
-    #        node_color=color_group,ax=ax1)
-    #else:
-    #    nx.draw_networkx_nodes(G,pos, node_color=color_group,ax=ax1)
 
+    
     if BTsizedNodes == True:
         ## pagerank sized nodes
         #npg = nx.pagerank(gCol,max_iter=1000, weight=None)
         npg = nx.betweenness_centrality(G)
         npg=list(npg.values())
+
+        ## edges positions
+        pos_edges=pos        
         
         nx.draw_networkx_nodes(G,pos,node_size=50+1000*((npg)/(np.max(npg))),
             node_color=color_group,ax=ax1)
+        
+        
+        nx.draw_networkx_edges(G,pos=pos_edges,edge_color=inter[edgeCols=='lightblue'],
+            connectionstyle="arc3,rad=0.15", node_size=50+1000*((npg)/(np.max(npg))),
+            width=5*inter[edgeCols=='lightblue'],ax=ax1, edgelist=blue_edges, edge_cmap=cmap3,edge_vmin=-1, edge_vmax=1)
+        nx.draw_networkx_edges(G,pos=pos_edges,edge_color=inter[edgeCols=='orange'],
+            connectionstyle="arc3,rad=0.15", node_size=50+1000*((npg)/(np.max(npg))),
+            width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap4,edge_vmin=-1, edge_vmax=1)
+
     else:
+        pos_edges=pos
+
+
         nx.draw_networkx_nodes(G,pos,node_color=color_group,ax=ax1)
-    #nx.draw_networkx_edges(G,pos=pos,edge_color=edcol[edgeCols=='lightblue'],
-    #    connectionstyle="arc3,rad=0.15",
-    #    width=5*inter[edgeCols=='lightblue'],ax=ax1, edgelist=blue_edges, edge_cmap=cmap1)
-    #nx.draw_networkx_edges(G,pos=pos,edge_color=edcol[edgeCols=='orange'],
-    #    connectionstyle="arc3,rad=0.15",
-    #    width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap2)
-    nx.draw_networkx_edges(G,pos=pos,edge_color=inter[edgeCols=='lightblue'],
-        connectionstyle="arc3,rad=0.15",
-        width=5*inter[edgeCols=='lightblue'],ax=ax1, edgelist=blue_edges, edge_cmap=cmap3,edge_vmin=-1, edge_vmax=1)
-    nx.draw_networkx_edges(G,pos=pos,edge_color=inter[edgeCols=='orange'],
-        connectionstyle="arc3,rad=0.15",
-        width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap4,edge_vmin=-1, edge_vmax=1)
+
+        nx.draw_networkx_edges(G,pos=pos_edges,edge_color=inter[edgeCols=='lightblue'],
+            connectionstyle="arc3,rad=0.15",
+            width=5*inter[edgeCols=='lightblue'],ax=ax1, edgelist=blue_edges, edge_cmap=cmap3,edge_vmin=-1, edge_vmax=1)
+        nx.draw_networkx_edges(G,pos=pos_edges,edge_color=inter[edgeCols=='orange'],
+            connectionstyle="arc3,rad=0.15",
+            width=5*inter[edgeCols=='orange'],ax=ax1, edgelist=orange_edges, edge_cmap=cmap4,edge_vmin=-1, edge_vmax=1)
+
+    
     nx.draw_networkx_labels(G,pos_attrs,verticalalignment='bottom',
         font_size=12,clip_on=False,ax=ax1, font_weight='bold')
     f.suptitle(plot_title)
-    #ax2.set_facecolor('white')
-    #plt.show()
+    
     sm = plt.cm.ScalarMappable(cmap=cmap4)
     sm._A = []
     sm.set_clim(-1, 1)
@@ -693,7 +623,8 @@ def unique(array):
     return uniq[index.argsort()]
 
 #%%
-def PIC_BGdoubletsOEratios(adata_singlets, nmults, annot, singIDs, sep):
+#def PIC_BGdoubletsOEratios(adata_singlets, nmults, annot, singIDs, sep):
+def PIC_BGdoubletsOEratios(adata_singlets):
     #nmults = Number of multiplets
     #annot = singlets annotation (character vector)
     #singIDs = singlets IDs (character vector)
@@ -719,10 +650,9 @@ def PIC_BGdoubletsOEratios(adata_singlets, nmults, annot, singIDs, sep):
     probs=rdf.annot[[i!='' for i in rdf.pair]].value_counts()/rdf.annot[[i!='' for i in rdf.pair]].value_counts().sum()
 
     pairProbs=pd.DataFrame()
-    #pairProbs=[]
     for x in probs:
         pairProbs=pd.concat([pairProbs, pd.DataFrame(x*probs)])
-        #pairProbs.append(x*probs)
+        
     pci=[]
     for x in probs.index:
         pci.append((x+'-'+probs.index.astype(str)).tolist())    
@@ -733,4 +663,3 @@ def PIC_BGdoubletsOEratios(adata_singlets, nmults, annot, singIDs, sep):
     ## O/E ratios
     OEratios=pairProbsO/pairProbs['count'][pairProbsO.index]
     return OEratios
-    #return pairProbsO, pairProbs
