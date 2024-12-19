@@ -1,0 +1,7 @@
+## Installation instructions
+
+conda env create -f environment.yml
+
+conda activate nichesphenv
+
+poetry install
