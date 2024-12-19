@@ -565,3 +565,81 @@
 [I 2024-12-18 17:51:19.379 ServerApp] Restoring connection for a00ac22a-1fb5-49f4-bd81-039c6124c9ee:b8de246c-9486-4edc-8cf7-1a2077ddc88e
 [I 2024-12-18 17:52:38.910 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
 [I 2024-12-18 17:54:11.890 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:09:47.338 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:17:50.355 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:19:50.996 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-19 16:19:51.256 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-19 16:21:51.335 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-19 16:21:51.561 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-19 16:29:52.332 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:31:53.311 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:33:53.510 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:35:53.753 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-19 16:35:54.638 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-19 16:37:54.712 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-19 16:37:55.095 ServerApp] /home/mayra/source/Nichesphere/nichesphere/tests/.~Nichesphere_tutorial_4clusts_clean.ipynb doesn't exist
+[I 2024-12-19 16:39:55.168 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:45:55.403 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:49:55.620 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:51:12.051 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 16:51:25.845 ServerApp] Kernel shutdown: a00ac22a-1fb5-49f4-bd81-039c6124c9ee
+[I 2024-12-19 16:51:27.382 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-19 16:51:27.382 ServerApp] Shutting down 4 extensions
+/home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyter_events/schema.py:68: JupyterEventsVersionWarning: The `version` property of an event schema must be a string. It has been type coerced, but in a future version of this library, it will fail to validate. Please update schema: https://events.jupyter.org/jupyter_server/contents_service/v1
+  validate_schema(_schema)
+/home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyter_events/schema.py:68: JupyterEventsVersionWarning: The `version` property of an event schema must be a string. It has been type coerced, but in a future version of this library, it will fail to validate. Please update schema: https://events.jupyter.org/jupyter_server/gateway_client/v1
+  validate_schema(_schema)
+/home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyter_events/schema.py:68: JupyterEventsVersionWarning: The `version` property of an event schema must be a string. It has been type coerced, but in a future version of this library, it will fail to validate. Please update schema: https://events.jupyter.org/jupyter_server/kernel_actions/v1
+  validate_schema(_schema)
+[I 2024-12-19 17:05:54.542 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-12-19 17:05:54.544 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-12-19 17:05:54.546 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-12-19 17:05:54.667 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-12-19 17:05:54.676 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-12-19 17:05:54.677 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-12-19 17:05:54.677 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-12-19 17:05:54.678 LabApp] JupyterLab extension loaded from /home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyterlab
+[I 2024-12-19 17:05:54.678 LabApp] JupyterLab application directory is /home/mayra/miniconda3/envs/nichesphenv/share/jupyter/lab
+[I 2024-12-19 17:05:54.678 LabApp] Extension Manager is 'pypi'.
+[I 2024-12-19 17:05:54.699 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-12-19 17:05:54.699 ServerApp] Serving notebooks from local directory: /home/mayra/source/Nichesphere/nichesphere
+[I 2024-12-19 17:05:54.699 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-12-19 17:05:54.699 ServerApp] http://localhost:8888/lab?token=dc63a38a8b9396bfb7d55f31620d08dbb98ce11cc432cb9e
+[I 2024-12-19 17:05:54.699 ServerApp]     http://127.0.0.1:8888/lab?token=dc63a38a8b9396bfb7d55f31620d08dbb98ce11cc432cb9e
+[I 2024-12-19 17:05:54.699 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-12-19 17:05:54.708 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/mayra/.local/share/jupyter/runtime/jpserver-1568494-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/lab?token=dc63a38a8b9396bfb7d55f31620d08dbb98ce11cc432cb9e
+        http://127.0.0.1:8888/lab?token=dc63a38a8b9396bfb7d55f31620d08dbb98ce11cc432cb9e
+[I 2024-12-19 17:05:54.888 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-12-19 17:05:56.849 LabApp] Could not determine jupyterlab build status without nodejs
+[W 2024-12-19 17:05:57.067 ServerApp] 404 GET /api/contents/PICseq?content=0&hash=0&1734624357065 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.83ms referer=http://localhost:8888/lab
+[W 2024-12-19 17:05:57.067 ServerApp] 404 GET /api/contents/PICseq?content=0&hash=0&1734624357065 (127.0.0.1): No such file or directory: PICseq
+[W 2024-12-19 17:05:57.068 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734624357066 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.76ms referer=http://localhost:8888/lab
+[W 2024-12-19 17:05:57.069 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734624357066 (127.0.0.1): No such file or directory: PICseq/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-19 17:05:57.070 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734624357067 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 1.22ms referer=http://localhost:8888/lab
+[W 2024-12-19 17:05:57.070 ServerApp] 404 GET /api/contents/PICseq/Nichesphere_tutorial_4clusts_clean.ipynb?content=0&hash=0&1734624357067 (127.0.0.1): No such file or directory: PICseq/Nichesphere_tutorial_4clusts_clean.ipynb
+[W 2024-12-19 17:05:58.184 ServerApp] 404 GET /api/contents/PICseq?1734624358183 (a8448758daac497b91f1350e4dd9a15f@127.0.0.1) 0.60ms referer=http://localhost:8888/lab
+[W 2024-12-19 17:05:58.185 ServerApp] 404 GET /api/contents/PICseq?1734624358183 (127.0.0.1): No such file or directory: PICseq
+/home/mayra/miniconda3/envs/nichesphenv/lib/python3.10/site-packages/jupyter_events/schema.py:68: JupyterEventsVersionWarning: The `version` property of an event schema must be a string. It has been type coerced, but in a future version of this library, it will fail to validate. Please update schema: https://events.jupyter.org/jupyter_server/kernel_actions/v1
+  validate_schema(_schema)
+[I 2024-12-19 17:06:10.323 ServerApp] Kernel started: e644b661-52df-4739-aa82-b53fafe59c77
+[I 2024-12-19 17:06:10.684 ServerApp] Connecting to kernel e644b661-52df-4739-aa82-b53fafe59c77.
+[I 2024-12-19 17:06:10.696 ServerApp] Connecting to kernel e644b661-52df-4739-aa82-b53fafe59c77.
+[I 2024-12-19 17:06:10.712 ServerApp] Connecting to kernel e644b661-52df-4739-aa82-b53fafe59c77.
+[I 2024-12-19 17:12:10.152 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 17:12:24.198 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 17:12:33.416 ServerApp] Kernel restarted: e644b661-52df-4739-aa82-b53fafe59c77
+[I 2024-12-19 17:12:33.419 ServerApp] Starting buffering for e644b661-52df-4739-aa82-b53fafe59c77:4c256f20-f5a5-40cb-949e-8c58b4526c56
+[I 2024-12-19 17:12:33.421 ServerApp] Connecting to kernel e644b661-52df-4739-aa82-b53fafe59c77.
+[I 2024-12-19 17:12:33.421 ServerApp] Restoring connection for e644b661-52df-4739-aa82-b53fafe59c77:4c256f20-f5a5-40cb-949e-8c58b4526c56
+[I 2024-12-19 17:14:11.243 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 17:16:11.706 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 17:18:23.139 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 17:24:38.761 ServerApp] Saving file at /tests/Nichesphere_tutorial_4clusts_clean.ipynb
+[I 2024-12-19 17:24:43.717 ServerApp] Kernel shutdown: e644b661-52df-4739-aa82-b53fafe59c77
+[I 2024-12-19 17:24:45.964 ServerApp] Shutting down on /api/shutdown request.
+[I 2024-12-19 17:24:45.965 ServerApp] Shutting down 4 extensions

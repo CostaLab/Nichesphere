@@ -133,14 +133,14 @@ def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
     for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
         for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
             pairsDir.append(ct+'->'+ct2)
-    pairCatDFdir=pd.DataFrame(pairsDir, columns=['pairs'])
+    pairCatDFdir=pd.DataFrame(pairsDir, columns=['cell_pairs'])
     
-    pairCatDFdir['colocCats']=''
+    pairCatDFdir['niche_pairs']=''
     for clust in np.sort(coloc_clusts.unique()):
-        pairCatDFdir['colocCats'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.pairs]]=clust+'->'+clust
+        pairCatDFdir['niche_pairs'][[cellCatContained(pair=p, cellCat=coloc_clusts.index[coloc_clusts==clust]) for p in pairCatDFdir.cell_pairs]]=clust+'->'+clust
 
     for comb in list(itertools.permutations(list(niches.keys()), 2)):
-        pairCatDFdir['colocCats'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.pairs]]=comb[0]+'->'+comb[1]
+        pairCatDFdir['niche_pairs'][[(p.split('->')[0] in niches[comb[0]]) & (p.split('->')[1] in niches[comb[1]]) for p in pairCatDFdir.cell_pairs]]=comb[0]+'->'+comb[1]
 
     return pairCatDFdir
 # %%
@@ -235,7 +235,7 @@ def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol):
 #%%
 def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
     """Calculates scores per ligand category from a database"""
-    pairCatDF.index=pairCatDF.pairs
+    pairCatDF.index=pairCatDF.cell_pairs
     db[dbMatchCol]=db[dbMatchCol].str.lower()
     ccommTable=ccommTable.iloc[[not(x in oneCTinteractions) for x in ccommTable['cellpair']],:]
     CTpairScores_byCat=pd.DataFrame()
@@ -353,18 +353,18 @@ def OvsE_coloc_test(observedColocProbs, expectedColocProbs, cell_types, testDist
 
 def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
     """Colocalisation adjacency matrix (and differential coloc test matrix)"""
-    x=pd.DataFrame(pairCatDF.pairs, columns=['pairs'], index=pairCatDF.pairs)
+    x=pd.DataFrame(pairCatDF.cell_pairs, columns=['cell_pairs'], index=pairCatDF.cell_pairs)
     x['stat']=0
 
-    for i in diffColocDF.pairs:
+    for i in diffColocDF.cell_pairs:
         if diffColocDF['p-value'][i]<p:
             x.stat[i.split('-')[0]+'->'+i.split('-')[1]]=diffColocDF.statistic[i]
             x.stat[i.split('-')[1]+'->'+i.split('-')[0]]=diffColocDF.statistic[i]
     
     x=pd.Series(x.stat)
     x_diff=pd.DataFrame(np.array(x).reshape(-1, ncells))
-    x_diff.columns=unique([x.split('->')[0] for x in pairCatDF.pairs])
-    x_diff.index=unique([x.split('->')[0] for x in pairCatDF.pairs])
+    x_diff.columns=unique([x.split('->')[0] for x in pairCatDF.cell_pairs])
+    x_diff.index=unique([x.split('->')[0] for x in pairCatDF.cell_pairs])
     
 
     ##Cosine similarity plus pseudocount
@@ -380,11 +380,11 @@ def getAdj_coloc(diffColocDF, pairCatDF, ncells, p=0.05):
 
 #%%
 def getColocFilter(pairCatDF, adj, oneCTints):
-    colocFilt=pd.DataFrame(pairCatDF.pairs, columns=['pairs'], 
-                       index=pairCatDF.pairs)
+    colocFilt=pd.DataFrame(pairCatDF.cell_pairs, columns=['cell_pairs'], 
+                       index=pairCatDF.cell_pairs)
     colocFilt['filter']=0
 
-    for i in pairCatDF.pairs:
+    for i in pairCatDF.cell_pairs:
         colocFilt['filter'][i]=adj.loc[i.split('->')[1],i.split('->')[0]]
     
     colocFilt['filter'][oneCTints]=1
@@ -478,7 +478,7 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
 #%%
 def getAdj_comm(diffCommTbl, pairCatDF, ncells, cat):
     """adjacency matrix and test values for communication (one category at a time)"""
-    x=pd.DataFrame(pairCatDF.pairs)
+    x=pd.DataFrame(pairCatDF.cell_pairs)
     x['wilcoxStat']=0
 
     
@@ -488,8 +488,8 @@ def getAdj_comm(diffCommTbl, pairCatDF, ncells, cat):
     
     x=pd.Series(x.wilcoxStat)
     x_chem=pd.DataFrame(np.array(x).reshape(-1, ncells))
-    x_chem.columns=unique([x.split('->')[0] for x in pairCatDF.pairs])
-    x_chem.index=unique([x.split('->')[0] for x in pairCatDF.pairs])
+    x_chem.columns=unique([x.split('->')[0] for x in pairCatDF.cell_pairs])
+    x_chem.index=unique([x.split('->')[0] for x in pairCatDF.cell_pairs])
 
     ## Another way around: similarities
     ##Cosine similarity
