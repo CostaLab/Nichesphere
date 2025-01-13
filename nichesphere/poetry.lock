@@ -981,16 +981,6 @@ gnn = ["torch", "torch-geometric"]
 plot = ["matplotlib"]
 
 [[package]]
-name = "pygraphviz"
-version = "1.14"
-description = "Python interface to Graphviz"
-optional = false
-python-versions = ">=3.10"
-files = [
-    {file = "pygraphviz-1.14.tar.gz", hash = "sha256:c10df02377f4e39b00ae17c862f4ee7e5767317f1c6b2dfd04cea6acc7fc2bea"},
-]
-
-[[package]]
 name = "pynndescent"
 version = "0.5.13"
 description = "Nearest Neighbor Descent"
@@ -1405,4 +1395,4 @@ tbb = ["tbb (>=2019.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d18575bcb74f4eadc2ad4dfadac352980b6e1d72e547c3a1b24a0347ea359810"
+content-hash = "b206a1b1ee1729232ce688f9010d6422c848a01cdbe7bea14770832b3e91af86"
