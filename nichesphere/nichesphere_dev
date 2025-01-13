@@ -13,7 +13,7 @@ conda install -c conda-forge pygraphviz
 conda install -c conda-forge jupyterlab
 
 ## pip dependencies
-poetry add scanpy leidenalg POT
+poetry add scanpy leidenalg POT pygraphviz
 
 poetry lock
 
@@ -32,12 +32,6 @@ conda env export | grep -v "^prefix: " > environment.yml
 #  - python=3.10.16=he725a3c_1_cpython
 #  - pip:
 #        - poetry==1.8.5
-
-conda env create -f environment.yml
-
-conda activate nichesphenv
-
-poetry install
 
 
 

@@ -1,7 +1,19 @@
-## Installation instructions
+## Installation instructions (poetry)
 
 conda env create -f environment.yml
 
 conda activate nichesphenv
 
 poetry install
+
+############
+
+## Installation instructions (pip)
+
+conda create --name test python=3.10
+conda activate test
+conda install pip
+pip install jupyterlab
+conda install --channel conda-forge pygraphviz
+
+pip install nichesphere-0.1.0.tar.gz
