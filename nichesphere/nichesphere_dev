@@ -13,7 +13,7 @@ conda install -c conda-forge pygraphviz
 conda install -c conda-forge jupyterlab
 
 ## pip dependencies
-poetry add scanpy leidenalg
+poetry add scanpy leidenalg POT
 
 poetry lock
 
