@@ -392,7 +392,8 @@ def getColocFilter(pairCatDF, adj, oneCTints):
     colocFilt=pd.DataFrame(colocFilt['filter'], index=colocFilt.index, columns=['filter'])
     return colocFilt
 #%%
-def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BTsizedNodes=False):
+def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, 
+            BTsizedNodes=False, legend_ax=[0.7, 0.05, 0.15, 0.2]):
 
     """Colocalisation network"""
     ## Just take into account differentially colocalised CT pairs (p<=0.05)
@@ -464,7 +465,7 @@ def colocNW(x_diff,adj, cell_group, group_cmap='tab20', ncols=20, clist=None, BT
     sm._A = []
     sm.set_clim(-1, 1)
 
-    cax = ax1.inset_axes([0.7, 0.05, 0.15, 0.2])
+    cax = ax1.inset_axes(legend_ax)
     cax.set_xticks([])
     cax.set_yticks([])
     cax.patch.set_alpha(1)
@@ -503,7 +504,8 @@ def getAdj_comm(diffCommTbl, pairCatDF, ncells, cat):
 
 #%%
 
-def catNW(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=None, plot_title='', clist=None, BTsizedNodes=False):    
+def catNW(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=None, plot_title='', 
+          clist=None, BTsizedNodes=False, legend_ax=[0.7, 0.05, 0.15, 0.2]):    
 
     #cell group cmap
     cmap = plt.cm.get_cmap(group_cmap, ncols)
@@ -604,7 +606,7 @@ def catNW(x_chem,colocNW, cell_group, group_cmap='tab20', ncols=20, color_group=
     sm._A = []
     sm.set_clim(-1, 1)
 
-    cax = ax1.inset_axes([0.7, 0.05, 0.15, 0.2])
+    cax = ax1.inset_axes(legend_ax)
     cax.set_xticks([])
     cax.set_yticks([])
     cax.patch.set_alpha(1)
