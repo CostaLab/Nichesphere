@@ -6,6 +6,6 @@ different conditions. Cell type pair co-localization probabilities are obtained 
 
 It also offers the possibility to look at biological process based differential communication among cellular niches based on Ligand-Receptor pairs expression data, such as results from CrossTalkeR [ref.].
 
-You can find an application example on the Myocardial Infarction atlas data from Kuppe et. al. 2022 here: https://github.com/CostaLab/Nichesphere/blob/main/nichesphere/tests/Nichesphere_tutorial_MIvisium.ipynb
+You can find our documentation and an application example on the Myocardial Infarction atlas data from Kuppe et. al. 2022 here: https://nichesphere.readthedocs.io/en/latest/ 
 
 
