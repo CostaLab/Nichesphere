@@ -23,9 +23,7 @@ Tutorials
 
 .. nbgallery::
     :caption: Notebooks:
-    :name: nb-gallery
     :glob:
-    :reversed:
 
-    notebooks/*.ipynb
+    notebooks/Nichesphere_tutorial_MIvisium.ipynb
 
