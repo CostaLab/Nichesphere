@@ -16,4 +16,5 @@ conda install pip
 pip install jupyterlab
 conda install --channel conda-forge pygraphviz
 
-pip install nichesphere-0.1.0.tar.gz
+#pip install nichesphere-0.1.0.tar.gz
+pip install git+https://github.com/CostaLab/Nichesphere#subdirectory=nichesphere
