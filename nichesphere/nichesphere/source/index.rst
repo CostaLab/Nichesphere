@@ -12,9 +12,15 @@ Welcome to Nichesphere's documentation!
 
 
 
-Indices and tables
+Introduction
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Blah...
+
+
+Tutorials
+==================
+
+.. nbgallery::
+   notebooks/Nichesphere_tutorial_MIvisium
+
