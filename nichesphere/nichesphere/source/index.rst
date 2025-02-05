@@ -43,6 +43,6 @@ In our first example we will use data from the Myocardial Infarction atlas from 
 API
 ===
 
-:doc:`api`
+:doc:`API/tl`
 
 
