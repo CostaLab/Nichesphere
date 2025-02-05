@@ -2,3 +2,4 @@ myst-parser
 nbsphinx
 sphinx_rtd_theme
 sphinx
+sphinx-autoapi
