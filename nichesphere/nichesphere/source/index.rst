@@ -46,3 +46,12 @@ In our first example we will use data from the Myocardial Infarction atlas from 
 
     notebooks/Nichesphere_tutorial_MIvisium.ipynb
 
+
+API
+===
+
+.. toctree::
+   :maxdepth: 2
+
+   API/tl
+
