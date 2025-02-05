@@ -154,10 +154,8 @@ def getColocProbs(CTprobs, spotSamples):
     ----------
     CTprobs : pd.DataFrame
         Dataframe of cell type probabilities per spot
-    spotSamples : list
-        List indicating the sample to which each spot belongs.
-    random_state : int or None, optional (default: None)
-        Random seed for k-means
+    spotSamples : pd.Series
+        Series indicating the sample to which each spot belongs, with spot ids as index.
 
     Returns
     -------
