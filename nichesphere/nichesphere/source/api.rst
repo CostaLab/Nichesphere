@@ -1,7 +1,7 @@
 API
 =====
 
-.. automodule:: tl
+.. automodule:: nichesphere.silhouette
    :members:
    :undoc-members:
    :show-inheritance:
