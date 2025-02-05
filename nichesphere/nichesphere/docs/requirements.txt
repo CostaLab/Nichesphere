@@ -7,7 +7,6 @@ sphinx-autoapi
 pandas
 scipy
 seaborn
-random
 matplotlib
 ot
 networkx
