@@ -8,9 +8,8 @@ Welcome to Nichesphere's documentation!
 
 .. toctree::
     :maxdepth: 2
-    :caption: Contents:
 
-    API
+    api
 
 
 
