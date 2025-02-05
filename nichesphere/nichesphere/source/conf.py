@@ -14,7 +14,10 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc','sphinx_rtd_theme', 'nbsphinx']
+extensions = ['sphinx.ext.autodoc','sphinx_rtd_theme', 'nbsphinx', 'sphinx.ext.autosummary', 'autoapi.extension']
+
+autoapi_dirs = ['..']
+autoapi_add_toctree_entry = False
 
 templates_path = ['_templates']
 exclude_patterns = []
