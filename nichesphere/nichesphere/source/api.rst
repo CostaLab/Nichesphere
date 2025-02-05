@@ -1,6 +1,6 @@
 API
 =====
 
-.. automodule:: tl
+.. automodule:: nichesphere.tl
    :members:
 
