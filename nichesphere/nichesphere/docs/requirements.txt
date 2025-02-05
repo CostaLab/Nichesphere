@@ -10,3 +10,4 @@ seaborn
 matplotlib
 networkx
 POT
+scikit-learn
