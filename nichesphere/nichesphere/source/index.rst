@@ -7,8 +7,10 @@ Welcome to Nichesphere's documentation!
 =======================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
+
+    API
 
 
 
@@ -45,13 +47,4 @@ In our first example we will use data from the Myocardial Infarction atlas from 
     :glob:
 
     notebooks/Nichesphere_tutorial_MIvisium.ipynb
-
-
-API
-===
-
-.. toctree::
-   :maxdepth: 2
-
-   API/tl
 
