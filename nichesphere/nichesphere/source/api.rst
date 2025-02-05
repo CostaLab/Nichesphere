@@ -1,5 +1,5 @@
 API
 =====
 
-.. automodule:: nichesphere.nichesphere.tl
+.. automodule:: nichesphere.tl
    :members:
