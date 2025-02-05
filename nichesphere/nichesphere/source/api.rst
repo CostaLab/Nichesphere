@@ -1,5 +1,5 @@
-nichesphere.fake module
------------------------
+fake module
+=======================
 
 .. automodule:: nichesphere.fake
    :members:

@@ -1,5 +1,5 @@
-nichesphere.tl module
------------------------
+tl module
+=====================
 
 .. automodule:: nichesphere.tl
    :members:
