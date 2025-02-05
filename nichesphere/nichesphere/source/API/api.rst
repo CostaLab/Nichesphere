@@ -1,7 +1,6 @@
 API
 =====
 
-.. automodule:: ../../tl
+.. automodule:: tl
    :members:
-   :undoc-members:
-   :show-inheritance:
+
