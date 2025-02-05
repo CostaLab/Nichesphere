@@ -9,3 +9,4 @@ scipy
 seaborn
 matplotlib
 networkx
+POT
