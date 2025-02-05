@@ -9,4 +9,3 @@ scipy
 seaborn
 matplotlib
 networkx
-sklearn
