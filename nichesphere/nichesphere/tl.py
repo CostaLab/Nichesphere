@@ -146,13 +146,23 @@ def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
 # %%
 ## w good for PIC and new data
 def getColocProbs(CTprobs, spotSamples):
-    """ Get colocalisation probabilities (sum across spots of probabilities of each cell type pair being in the same spot) 
-    #filesList=list of mapping anndata files 
-    #filePrefix=prfix coming before the part of the file name indicating the sample
-    CTprobs=cell type probabilities per spot
-    spotSamples=sample to which each spot belongs, with cell id as index
-    nCellTypes=number of cell types.
-    Returns concatenated single sample matrices of celltype x cell type"""
+
+    """Get co-localization probabilities 
+    (sum across spots of probabilities of each cell type pair being in the same spot)
+
+    Parameters
+    ----------
+    CTprobs : pd.DataFrame
+        Dataframe of cell type probabilities per spot
+    spotSamples : pd.Series
+        Series indicating the sample to which each spot belongs, with spot ids as index.
+
+    Returns
+    -------
+    CTcolocalizationP : pd.DataFrame
+        concatenated dataframes of cell type pairs co-localization probabilities per sample
+    """
+
     CTcolocalizationP=pd.DataFrame()
     
     for smple in spotSamples.unique():
