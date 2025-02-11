@@ -51,84 +51,25 @@ cmap4 = ListedColormap(cmap4)
 
 
 # %%
-def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
-    '''
-    Calculates the marginal distribution of probabilities of cells to be mapped to a visium slice. Cell type dependent. Cells of the same type 
-    get the same prior probability to be mapped. Sums up to 1
-    sc_adata=single cell RNA-seq anndata
-    ct_col=column in sc_adata.obs indicating cell type
-    sample_col=column in sc_adata.obs indicating the sample cells belong to
-    sample=name of analyzed sample (function is executed once per sample)
-    p=proportion of cells we assume we detect in the scRNA-seq experiment (default=1)
-    sampleCTprops=vector of cell type proportions in a sample (we can input this in case we have estimates not coming from the scRNA-seq dataset )
-    ns=number of cells from the analysed sample (can be inputed in case our estimate does not come from the scRNA-seq dataset)
-    '''
-    
-    cells_prior=ot.unif(len(sc_adata.obs.index))
-    for x in range(len(cells_prior)):
-        cells_prior[x]=None
-    
-    cts=sc_adata.obs[ct_col].value_counts().index
-    nk=sc_adata.obs[ct_col].value_counts()
-    nks=sc_adata.obs[ct_col].value_counts()
-    ns=sc_adata.obs[sample_col].value_counts() if ns is None else ns
-    n=len(sc_adata.obs_names)
-
-    for x in range(len(nks)):
-        nks[x]=0
-
-    sampleCTprops = sc_adata.obs[sc_adata.obs[sample_col]==sample][ct_col].value_counts()/sc_adata.obs[sc_adata.obs[sample_col]==sample][ct_col].value_counts().sum() if sampleCTprops is None else sampleCTprops
-     
-    for x in sampleCTprops.index: 
-        nks[x]=np.round(sampleCTprops[x]*ns[sample])
-    
-    for ct in cts:
-        cells_prior[list(sc_adata.obs[ct_col]==ct)]=((p*nks[ct]/nk[ct])+(((1-p)*ns[sample])/n))/ns[sample]
-
-        
-    
-    return cells_prior
-
-# %%
-
-def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
-    '''
-    Calculates the marginal distribution of probabilities of cells to be mapped to a visium slice. Sample dependent. In cases where a dataset with cells from 
-     different slices are present and matching sc/snRNA-seq data is available, cells from the matching slice from the same type 
-    get the same prior probability to be mapped based on sample specific cell type proportions. Other cells get a probability based on the total proportion of cells belonging to the slice. 
-    Sums up to 1, the probabilities for cells from the mapped visium slice sum up to p
-    sc_adata=single cell RNA-seq anndata
-    ct_col=column in sc_adata.obs indicating cell type
-    sample_col=column in sc_adata.obs indicating the sample cells belong to
-    sample=name of analyzed sample (function is executed once per sample)
-    p=proportion of cells we assume we detect in the scRNA-seq experiment (default=1)
-    sampleCTprops=vector of cell type proportions in a sample (we can input this in case we have estimates not coming from the scRNA-seq dataset )
-    ns=number of cells from the analysed sample (can be inputed in case our estimate does not come from the scRNA-seq dataset)
-    '''
-    cells_prior=ot.unif(len(sc_adata.obs.index))
-    for x in range(len(cells_prior)):
-        cells_prior[x]=None
-    cts=sc_adata.obs[ct_col].value_counts().index
-    nk=sc_adata.obs[ct_col].value_counts()
-    nks=sc_adata.obs[ct_col].value_counts()
-    ns=sc_adata.obs[sample_col].value_counts() if ns is None else ns
-    n=len(sc_adata.obs_names)
-    for x in range(len(nks)):
-        nks[x]=0
-    sampleCTprops = sc_adata.obs[sc_adata.obs[sample_col]==sample][ct_col].value_counts()/sc_adata.obs[sc_adata.obs[sample_col]==sample][ct_col].value_counts().sum() if sampleCTprops is None else sampleCTprops
-    for x in sampleCTprops.index: 
-        nks[x]=np.round(sampleCTprops[x]*ns[sample])
-    
- 
-    for ct in cts:
-        cells_prior[list((sc_adata.obs[sample_col]==sample) & (sc_adata.obs[ct_col]==ct))]=p*nks[ct]/(nks[ct]*ns[sample])
-        cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(1-p)/(n-ns[sample])
-    
-    return cells_prior
-#%%
 
 def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
-    ## niches=niches_dict, coloc_probs=CTcolocalizationP, coloc_clusts=colocClusts
+    
+    """Get dataframe of cell pair to niche pair correspondence
+
+    Parameters
+    ----------
+    niches : dictionary
+        Dictionary with niche names as keys and their corresponding cell types as items (list per niche)
+    coloc_probs : pd.DataFrame
+        Concatenated dataframes of cell type pairs co-localization probabilities per sample (or any dataframe with cell types as columns)
+    coloc_clusts : pd.Series
+        Series of niches / clusters with cell types as index
+
+    Returns
+    -------
+    pairCatDFdir : pd.DataFrame
+        dataframe of cell pairs and corresponding niche pairs
+    """
     pairsDir=[]
     for ct in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:
         for ct2 in coloc_probs.columns[range(len(coloc_probs.columns)-1)]:

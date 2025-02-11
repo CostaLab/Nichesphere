@@ -80,6 +80,8 @@ def locations_score_per_cluster(tissue: novosparc.cm.Tissue, cluster_key: str='c
 # %%
 def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
     '''
+    Calculates the marginal distribution of probabilities of cells to be mapped to a visium slice. Cell type dependent. Cells of the same type 
+    get the same prior probability to be mapped. Sums up to 1
     sc_adata=single cell RNA-seq anndata
     ct_col=column in sc_adata.obs indicating cell type
     sample_col=column in sc_adata.obs indicating the sample cells belong to
@@ -118,6 +120,10 @@ def setPriorDef(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, n
 
 def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=None, ns=None):
     '''
+    Calculates the marginal distribution of probabilities of cells to be mapped to a visium slice. Sample dependent. In cases where a dataset with cells from 
+     different slices are present and matching sc/snRNA-seq data is available, cells from the matching slice from the same type 
+    get the same prior probability to be mapped based on sample specific cell type proportions. Other cells get a probability based on the total proportion of cells belonging to the slice. 
+    Sums up to 1, the probabilities for cells from the mapped visium slice sum up to p
     sc_adata=single cell RNA-seq anndata
     ct_col=column in sc_adata.obs indicating cell type
     sample_col=column in sc_adata.obs indicating the sample cells belong to
@@ -140,16 +146,9 @@ def setPrior_sampleReg(sc_adata, ct_col, sample_col, sample, p=1, sampleCTprops=
     for x in sampleCTprops.index: 
         nks[x]=np.round(sampleCTprops[x]*ns[sample])
     
-    #for ct in cts:
-    #    cells_prior[list(sc_adata.obs[ct_col]==ct)]=((p*nks[ct]/nk[ct])+(((1-p)*ns[sample])/n))/ns[sample]
-
-    #for ct in cts:
-    #    cells_prior[list((sc_adata.obs[sample_col]==sample) & (sc_adata.obs[ct_col]==ct))]=(nks[ct]/nk[ct])/(ns[sample]*ns[sample]/n)
-    #    cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(ns[sample]/n)/(ns[sample]*(n-ns[sample])/n)
  
     for ct in cts:
         cells_prior[list((sc_adata.obs[sample_col]==sample) & (sc_adata.obs[ct_col]==ct))]=p*nks[ct]/(nks[ct]*ns[sample])
-        #cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(1-p)*(ns[sample]/n)/((n-ns[sample])*ns[sample]/n)
         cells_prior[list((sc_adata.obs[sample_col]!=sample) & (sc_adata.obs[ct_col]==ct))]=(1-p)/(n-ns[sample])
     
     return cells_prior
