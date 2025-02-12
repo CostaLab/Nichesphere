@@ -10,6 +10,7 @@ import ot
 import networkx as nx
 import itertools
 import sklearn
+import scanpy as sc
 
 from matplotlib.colors import ListedColormap
 
@@ -51,6 +52,14 @@ cmap4 = ListedColormap(cmap4)
 
 
 # %%
+
+def get_spot_ct_props(spot_cell_props, sc_ct):
+    ## Get cell type proportions per spot by summing the probabilities of cells of the same kind in each spot
+    arr=[np.array([np.sum(np.array(spot_cell_props.iloc[:, location][np.argwhere(sc_ct == cluster).flatten()])) for cluster in sc_ct.unique()]) for location in range(spot_cell_props.shape[1])]
+    spot_mapped_cts=pd.DataFrame(arr, columns=sc_ct.unique(), index=spot_cell_props.columns)
+    return spot_mapped_cts
+    
+#%%
 
 def get_pairCatDFdir(niches, coloc_probs, coloc_clusts):
     
@@ -126,7 +135,23 @@ def getColocProbs(CTprobs, spotSamples):
 def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   
     """Transforms matrix obtained with getColocProbs into a matrix of CT pairs x samples
     CTcoloc=previously obtained colocalisation matrix from getColocprobs
-    complete=list with repeated values (ct1_x_ct2 and ct2_x_ct1)"""
+    complete=list with repeated values (ct1_x_ct2 and ct2_x_ct1)
+    
+    Parameters
+    ----------
+    CTcoloc : pd.DataFrame
+        Concatenated dataframes of cell type pairs co-localization probabilities per sample (obtained via getColocProbs())
+    oneCTinteractions : list
+        list of single cell interactions (celltype-celltype)
+    complete : flag ; default = 1
+        indicates if the co-localization matrices are complete (1) (not just half) , with repeated values at ct1_x_ct2 and ct2_x_ct1
+        or half matrices are used as input (0)
+    
+    Returns
+    -------
+    colocPerSample1 : pd.DataFrame
+        Probabilities of each cell type pair per sample
+    """
     colocPerSample1=pd.DataFrame()
     if(complete==0):
         i=0
@@ -153,16 +178,77 @@ def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):
 
 
 # %%
+def diffColoc_test(coloc_pair_sample, sampleTypes, exp_condition, ctrl_condition):
+    """ Differential co-localization test with table of scores and p-values as output
+    Params=coloc_pair_sample (coloc per cell type pair per sample table), exp_condition (non control phenotype to test),
+    ctrl_condition (control phenotype), sampleTypes (dataframe with sample names and sample types columns named "sample" and "sampleType")
+    """
+    pvals=[scipy.stats.ranksums(coloc_pair_sample.loc[coloc_pair_sample.index[sampleTypes.sampleType==exp_condition],c], 
+                                        coloc_pair_sample.loc[coloc_pair_sample.index[sampleTypes.sampleType==ctrl_condition],c]).pvalue for c in coloc_pair_sample.columns]
+    stat=[scipy.stats.ranksums(coloc_pair_sample.loc[coloc_pair_sample.index[sampleTypes.sampleType==exp_condition],c], 
+                                        coloc_pair_sample.loc[coloc_pair_sample.index[sampleTypes.sampleType==ctrl_condition],c]).statistic for c in coloc_pair_sample.columns]
+
+
+    df=pd.DataFrame([coloc_pair_sample.columns, stat, pvals], index=['pairs', 'statistic', 'p-value']).T
+    #myo_iscDF=myo_iscDF.sort_values(['p-value'])
+    df.index=df.pairs
+    return df
+
+#%%
+def pval_filtered_HMdf(testDF, oneCTinteractions, p, cell_types):
+    """ Get dataframe for scores heatmap from dataframe obtained from diffColoc_test()
+    
+    """
+    testHM=testDF.statistic.copy()
+    testHM[testDF['p-value']>p]=0
+    testHM[oneCTinteractions]=0
+    # Reshape into data frame
+    testHM=pd.DataFrame(np.array(testHM).reshape(-1, len(cell_types)))
+    testHM.columns=cell_types
+    testHM.index=cell_types
+    testHM=testHM.apply(pd.to_numeric)
+    
+    return testHM
+
+# %%
 def cellCatContained(pair, cellCat):
-    """Boolean element indicating whether the specified element (cell pair) is contained in 
+    """Generate boolean element indicating whether the specified element (cell pair) is contained in 
     a list (category)
-    pair=evaluated cell type pair
-    cellCat=category as a list of cell types"""
+
+    Parameters
+    ----------
+    pair : str
+        Evaluated element (cell type pair usually in this context)
+    cellCat : list
+        Category to test (EG: list containing a cell type category)
+
+    Returns
+    -------
+    True or False
+    
+    """
     
     contained=[cellType in pair for cellType in cellCat]
     return True in contained
 # %%
 def cells_niche_colors(CTs, niche_colors, niche_dict):
+    """ Make dataframe of cell types with their corresponding niches and colors
+
+    Parameters
+    ----------
+    CTs : pd.Series or list
+        list of cell types
+    niche_colors : pd.Series
+        Series of colors in hexadecimal format with niche names as index
+    niche_dict : dictionary
+        Dictionary with niche names as keys and cell types as elements
+
+    Returns
+    -------
+    niche_df : pd.DataFrame
+        Dataframe of cell types with their corresponding niches and colors
+    
+    """
     niche_df=pd.DataFrame(CTs, columns=['cell'])
     niche_df['niche']=niche_colors.index[0]
     niche_df['color']=niche_colors[0]
@@ -170,10 +256,48 @@ def cells_niche_colors(CTs, niche_colors, niche_dict):
         niche_df['niche'][[c in niche_dict[key] for c in niche_df.cell]]=key
         niche_df['color'][niche_df['niche']==key]=niche_colors[key]
     niche_df.index=niche_df.cell
+    niche_df.niche=niche_df.niche.astype('category')
     return niche_df
 
 
-# %%
+#%%
+def spatialNichePlot(adata, cell_types, nicheDF, CTprobs=None, maxCT_col=None, spot_size=1, niche_colors=None, legend_fontsize=7, wspace=0.5, save_name='test.pdf'):
+    """ Plot niches and cell types in spatial data (MERFISH / visium slices)
+        adata=sample specific spatial anndata object
+        CTprobs=sample specific cell type probabilities per spot
+        cell_types=categorical series of cell types
+        nicheDF=dataframe of cell types and niches (obtained previously via cells_niche_colors())
+        niche_colors=series of colors with niche names as indexes
+        maxCT_col=cell type column in sc spatial data
+    """
+    tmp=adata.copy()
+
+    if maxCT_col is None:
+        tmp.obs['maxCT']=[CTprobs.columns[np.argmax(CTprobs.loc[idx])] for idx in CTprobs.index]
+        tmp.obs.maxCT=tmp.obs.maxCT.astype('category')
+        #adata_ex.obs.maxCT.cat.categories=mudata['sc'].obs.cell_subtype2.cat.categories
+        for c in np.setdiff1d(cell_types.cat.categories,tmp.obs.maxCT.cat.categories):
+            tmp.obs.maxCT = tmp.obs.maxCT.cat.add_categories(c)
+        tmp.obs.maxCT=tmp.obs.maxCT.cat.reorder_categories(cell_types.cat.categories)
+    else:
+        tmp.obs['maxCT']=tmp.obs[maxCT_col]
+    
+    tmp.obs['niche']='1_'
+    for ct in nicheDF.cell:
+        tmp.obs.niche[tmp.obs.maxCT==ct]=nicheDF.niche[nicheDF.cell==ct][0]
+
+    tmp.obs.niche=tmp.obs.niche.astype('category')
+    for c in np.setdiff1d(nicheDF.niche.cat.categories,tmp.obs.niche.cat.categories):
+        tmp.obs.niche = tmp.obs.niche.cat.add_categories(c)
+    tmp.obs.niche=tmp.obs.niche.cat.reorder_categories(nicheDF.niche.cat.categories)
+
+    if niche_colors is not None:
+        tmp.uns['niche_colors']=niche_colors
+    
+    #sc.pl.spatial(adata_ex, color=['maxCT', 'niche'], img_key=None, library_id=None, spot_size=200, save='_'+smpl+'_niches_cellST.pdf')
+    #with plt.rc_context({"figure.figsize": (2, 2)}):
+    sc.pl.spatial(tmp, color=['maxCT', 'niche'], img_key=None, library_id=None, spot_size=spot_size, legend_fontsize=legend_fontsize, wspace=wspace, save=save_name)
+#%%
 def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol):
     """Get cell communication scores per cell type pair per LR pair by summing that LR pair scores for that cell type pair. 
     ccommTable=crossTalkeR results table (single condition)
