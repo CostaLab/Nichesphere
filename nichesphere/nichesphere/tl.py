@@ -54,7 +54,8 @@ cmap4 = ListedColormap(cmap4)
 # %%
 
 def get_spot_ct_props(spot_cell_props, sc_ct):
-    ## Get cell type proportions per spot by summing the probabilities of cells of the same kind in each spot
+    """ Get cell type proportions per spot by summing the probabilities of cells of the same kind in each spot
+    """
     arr=[np.array([np.sum(np.array(spot_cell_props.iloc[:, location][np.argwhere(sc_ct == cluster).flatten()])) for cluster in sc_ct.unique()]) for location in range(spot_cell_props.shape[1])]
     spot_mapped_cts=pd.DataFrame(arr, columns=sc_ct.unique(), index=spot_cell_props.columns)
     return spot_mapped_cts
