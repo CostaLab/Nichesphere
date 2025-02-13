@@ -1,7 +1,7 @@
 fake module
 =======================
 
-.. automodule:: nichesphere.fake
+.. automodule:: fake
    :members:
    :undoc-members:
    :show-inheritance:
