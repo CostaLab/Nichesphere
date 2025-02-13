@@ -9,7 +9,7 @@ import ot
 import networkx as nx
 import itertools
 import sklearn
-#import scanpy as sc
+import scanpy as sc
 
 from matplotlib.colors import ListedColormap
 
