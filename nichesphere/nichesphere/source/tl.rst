@@ -1,7 +1,7 @@
 tl module
 =====================
 
-.. automodule:: nichesphere.tl
+.. automodule:: tl
    :members:
    :undoc-members:
    :show-inheritance:
