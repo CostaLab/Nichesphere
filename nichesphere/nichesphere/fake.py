@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def silhouette_score(phate_op, n_clusters, random_state=None, **kwargs):
     """Compute the Silhouette score on KMeans on the PHATE potential
