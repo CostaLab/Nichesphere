@@ -13,15 +13,6 @@ import scanpy as sc
 
 from matplotlib.colors import ListedColormap
 
-# Choose colormap
-cmap = plt.cm.Blues
-# Get the colormap colors
-cmap1 = cmap(np.arange(cmap.N))
-# Set alpha (transparency)
-cmap1[:,-1] = np.linspace(0, 0.5, cmap.N)
-# Create new colormap
-cmap1 = ListedColormap(cmap1)
-
 def silhouette_score(phate_op, n_clusters, random_state=None, **kwargs):
     """Compute the Silhouette score on KMeans on the PHATE potential
 
