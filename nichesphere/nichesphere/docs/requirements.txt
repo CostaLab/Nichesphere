@@ -10,3 +10,4 @@ matplotlib
 networkx
 POT
 scikit-learn
+scanpy[leiden]
