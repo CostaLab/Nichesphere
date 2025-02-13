@@ -25,6 +25,7 @@ In your terminal window run::
     conda install pip
     pip install jupyterlab
     conda install --channel conda-forge pygraphviz
+    conda install conda-forge::git
     pip install git+https://github.com/CostaLab/Nichesphere#subdirectory=nichesphere
 
 
