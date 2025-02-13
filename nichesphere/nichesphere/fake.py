@@ -3,8 +3,6 @@ import pandas as pd
 import scipy
 import seaborn as sns
 import random
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import ot
 import networkx as nx
 import itertools
