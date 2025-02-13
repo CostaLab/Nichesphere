@@ -31,19 +31,21 @@ In your terminal window run::
 Tutorials
 =========
 
-In our first example we will use data from the Myocardial Infarction atlas from Kuppe, C. et. Al., 2022 to find differential co-localization domains related to ischemia and involved biological processes.
+In our first example we will use data from the Myocardial Infarction atlas from Kuppe, C. et. Al., 2022 to find differential co-localization domains related to ischemia.
 
 .. nbgallery::
     :caption: Notebooks:
     :glob:
 
-    notebooks/Nichesphere_tutorial_MIvisium.ipynb
+    notebooks/Nichesphere_tutorial_MIvisium_coloc.ipynb
 
 
 API
 ===
 
-:doc:`api`
+:doc:`coloc`
+
+:doc:`comm`
 
 :doc:`tl`
 
