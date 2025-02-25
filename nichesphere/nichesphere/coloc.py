@@ -160,7 +160,7 @@ def diffColoc_test(coloc_pair_sample, sampleTypes, exp_condition, ctrl_condition
     return df
 
 #%%
-def spatialNichePlot(adata, cell_types, nicheDF, CTprobs=None, maxCT_col=None, spot_size=1, niche_colors=None, legend_fontsize=7, wspace=0.5, save_name='test.pdf'):
+def spatialNichePlot(adata, cell_types, nicheDF, CTprobs=None, maxCT_col=None, spot_size=1, niche_colors=None, legend_fontsize=7, wspace=0.5, title="", save_name='test.pdf'):
     """ Plot niches and cell types in spatial data (MERFISH / visium slices)
         adata=sample specific spatial anndata object
         CTprobs=sample specific cell type probabilities per spot
@@ -195,7 +195,8 @@ def spatialNichePlot(adata, cell_types, nicheDF, CTprobs=None, maxCT_col=None, s
     
     #sc.pl.spatial(adata_ex, color=['maxCT', 'niche'], img_key=None, library_id=None, spot_size=200, save='_'+smpl+'_niches_cellST.pdf')
     #with plt.rc_context({"figure.figsize": (2, 2)}):
-    sc.pl.spatial(tmp, color=['maxCT', 'niche'], img_key=None, library_id=None, spot_size=spot_size, legend_fontsize=legend_fontsize, wspace=wspace, save=save_name)
+    #sc.pl.spatial(tmp, color=['maxCT', 'niche'], img_key=None, library_id=None, spot_size=spot_size, legend_fontsize=legend_fontsize, wspace=wspace, save=save_name)
+    sc.pl.spatial(tmp, color='niche', img_key=None, library_id=None, spot_size=spot_size, legend_fontsize=legend_fontsize, wspace=wspace, title = title, save=save_name)
 
 #%%
 
