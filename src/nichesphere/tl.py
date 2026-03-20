@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import networkx as nx
 
+from joblib import Parallel, delayed
+import time
+from collections import Counter
+
 
 def get_spot_ct_props(spot_cell_props, sc_ct):
     """ Get cell type proportions per spot by summing the probabilities of cells of the same 
@@ -175,6 +179,99 @@ def PIC_BGdoubletsOEratios(adata_singlets, annot_col):
 
 
 #%%
+
+def PIC_BGdoubletsOEratios_parallel(seed, adata, annot_col, target_pairs):
+    
+    """Generate set of O/E ratios for colocalization probabilities of cell type pairs based on randomly paired single cells.
+    n runs of this function generate distributions of n values for each cell type pair, which can be used for tests in PIC-seq data or datasets with one sample
+    
+    Parameters
+    ----------
+    seed : int
+        seed for generating random distributions
+    adata : AnnData
+        anndata object containing singlets (scRNA-seq) data
+    annot_col : str
+        name of the cell type annotation column in the anndata object obs
+    target_pairs : list or pd.DataFrame
+        list of cell type pairs to be evaluated
+
+    Returns
+    -------
+    oe_ratios : pd.Series
+        set of O/E ratios for colocalization probabilities of cell type pairs in randomly paired single cells
+    """
+    
+    # Initialize a local random generator with the specific seed
+    random.seed(seed)
+    # 1. Shuffle to randomize the order
+    my_list=list(adata.obs[annot_col])
+    random.shuffle(my_list)
+    # 2. Pair them up and format into strings
+    it = iter(my_list)
+    observed_pairs = [f"{a}-{b}" for a, b in zip(it, it)]
+
+    # 3. Calculate Observed Frequencies
+    obs_counts = Counter(observed_pairs)
+    total_gen = len(observed_pairs)
+    
+    # 4. Calculate Expected Frequencies
+    # Expected = P(Item1) * P(Item2 | Item1) * Total Pairs
+    item_counts = Counter(my_list)
+    n = len(my_list)
+
+    def calculate_ratio(pair_str):
+        try:
+            a, b = pair_str.split('-')
+            # Probability of A then B
+            p_a = item_counts[a] / n
+            p_b = (item_counts[b] - (1 if a == b else 0)) / (n - 1)
+            expected = p_a * p_b * total_gen
+            
+            observed = obs_counts.get(pair_str, 0)
+            return observed / expected if expected > 0 else 0.0
+        except:
+            return 0.0
+
+    # 5. Create the Pandas Series
+    oe_ratios = pd.Series(
+        {pair: calculate_ratio(pair) for pair in target_pairs},
+        name="OE_Ratio"
+    )
+    
+    #t=pd.Series(random_strings)
+    return oe_ratios
+#%%
+
+def get_PIC_BG_OEratios_DF(adata, annot_col, target_pairs, nreps=1000, njobs=10):
+    """Generate nreps sets of O/E ratios for colocalization probabilities of cell type pairs based on randomly paired single cells via the PIC_BGdoubletsOEratios_parallel function.
+    Depending on nreps this function generate that number of sets of O/E values for each cell type pair, which can be used for tests based on empirical p-values in PIC-seq data or datasets with one sample
+    
+    Parameters
+    ----------
+    adata : AnnData
+        anndata object containing singlets (scRNA-seq) data
+    annot_col : str
+        name of the cell type annotation column in the anndata object obs
+    target_pairs : list or pd.DataFrame
+        list of cell type pairs to be evaluated
+    nreps : int (default: 1000)
+        number of sets of O/E values to obtain for each cell type pair
+    njobs : int (default: 10)
+        number of parallel jobs to be executed
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Data frame of nreps rows , which will be sets of O/E ratios for colocalization probabilities of cell type pairs in randomly paired single cells
+    """
+    t = time.time()
+    res=Parallel(n_jobs=njobs)(delayed(PIC_BGdoubletsOEratios_parallel)(seed=i, adata=adata, annot_col=annot_col, target_pairs=target_pairs) for i in range(nreps))
+    df = pd.concat(res, axis=1).T
+    print(time.time() - t)
+    return df
+#%%
+
 def getExpectedColocProbsFromSCs(sc_adata, sample, cell_types, sc_data_sampleCol, sc_adata_annotationCol):
     """Compute the expected probability of each cell type pair to occur in a specific condition by multiplying cell type proportions from 
     the single cell data

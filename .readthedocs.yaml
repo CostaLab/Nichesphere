@@ -32,4 +32,8 @@ sphinx:
 # See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
 python:
   install:
+    # 1. Install all dependencies (statsmodels, joblib, gravis)
      - requirements: docs/requirements.txt
+     # 2. Install the library itself so Sphinx can find your code
+     - method: pip
+       path: .

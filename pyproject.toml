@@ -18,7 +18,13 @@ scanpy = "1.10.4"
 leidenalg = "^0.10.2"
 pot = "^0.9.5"
 anndata = "0.11.4"
+joblib = "^1.5.3"
+statsmodels = "^0.14.6"
+gravis = {version = "^0.1.0", optional = true}
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.extras]
+viz = ["gravis"]
