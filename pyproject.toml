@@ -13,11 +13,12 @@ readme = "README.md"
 where = ["src"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 scanpy = ">=1.10.4,<1.12"
 leidenalg = "^0.10.2"
 pot = "^0.9.5"
-anndata = ">=0.11.4,<0.13"
+anndata = ">=0.12.11,<0.14"
+zarr = ">=3.1.6,<4"
 
 [build-system]
 requires = ["poetry-core"]
