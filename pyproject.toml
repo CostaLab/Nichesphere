@@ -14,10 +14,10 @@ where = ["src"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-scanpy = "1.10.4"
+scanpy = ">=1.10.4,<1.12"
 leidenalg = "^0.10.2"
 pot = "^0.9.5"
-anndata = "0.11.4"
+anndata = ">=0.11.4,<0.13"
 
 [build-system]
 requires = ["poetry-core"]
