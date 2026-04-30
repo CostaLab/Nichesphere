@@ -238,12 +238,12 @@ def getDiffComm(diffCommTbl, pairCatDF, ncells, cat):
         cells x cells or groups x groups dataframe of differential communication scores for a specific LR category
     """
     x=pd.DataFrame(pairCatDF.cell_pairs)
-    x['wilcoxStat']=0
+    x['wilcoxStat']=0.0
     x.index=pairCatDF.cell_pairs
 
     
     for i in diffCommTbl.columns:
-        x.wilcoxStat[i]=diffCommTbl[i][cat]
+        x.loc[i, 'wilcoxStat']=diffCommTbl[i][cat]
 
     
     x=pd.Series(x.wilcoxStat)
@@ -342,7 +342,7 @@ def catNW(x_chem,colocNW, cell_group, group=None, group_cmap='tab20', ncols=20, 
     graycmp = ListedColormap(graycmp)
     
     #cell group cmap
-    cmap = plt.cm.get_cmap(group_cmap, ncols)
+    cmap = plt.colormaps[group_cmap].resampled(ncols)
     if clist == None:
         cgroup_cmap=[mcolors.rgb2hex(cmap(i)[:3]) for i in range(cmap.N)]
     else:

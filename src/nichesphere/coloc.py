@@ -439,7 +439,7 @@ def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, cl
     graycmp = ListedColormap(graycmp)
     
     #cell groups cmap
-    cmap = plt.cm.get_cmap(group_cmap, ncols)
+    cmap = plt.colormaps[group_cmap].resampled(ncols)
     if clist == None:
         cgroup_cmap=[mcolors.rgb2hex(cmap(i)[:3]) for i in range(cmap.N)]
     else:

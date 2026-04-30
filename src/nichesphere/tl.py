@@ -77,8 +77,8 @@ def cells_niche_colors(CTs, niche_colors, niche_dict):
     niche_df['niche']=niche_colors.index[0]
     niche_df['color']=niche_colors[0]
     for key in list(niche_dict.keys()):
-        niche_df['niche'][[c in niche_dict[key] for c in niche_df.cell]]=key
-        niche_df['color'][niche_df['niche']==key]=niche_colors[key]
+        niche_df.loc[[c in niche_dict[key] for c in niche_df.cell], 'niche']=key
+        niche_df.loc[niche_df['niche']==key, 'color']=niche_colors[key]
     niche_df.index=niche_df.cell
     niche_df.niche=niche_df.niche.astype('category')
     return niche_df
@@ -155,7 +155,7 @@ def PIC_BGdoubletsOEratios(adata_singlets, annot_col):
     ## Get random singlets pairs
     pairNums=[i for i in range(int(np.round(adata_singlets.obs.shape[0]//2))) for _ in range(2)]
     pairNumsIdx=random.sample(list(adata_singlets.obs.index), len(pairNums))
-    rdf.pair[pairNumsIdx]=pairNums
+    rdf.loc[pairNumsIdx, 'pair']=pairNums
 
     pairCounts=[rdf.annot[rdf.pair==i][0]+'-'+rdf.annot[rdf.pair==i][1] for i in rdf.pair.value_counts().index[rdf.pair.value_counts()==2]]
     
@@ -331,10 +331,10 @@ def get_pairCatDFdir(niches_df):
     
     pairCatDFdir['niche_pairs']=''
     for clust in np.sort(niches_df.niche.unique()):
-        pairCatDFdir['niche_pairs'][[cellCatContained(pair=p, cellCat=niches_df.cell[niches_df.niche==clust]) for p in pairCatDFdir.cell_pairs]]=clust+'->'+clust
+        pairCatDFdir.loc[[cellCatContained(pair=p, cellCat=niches_df.cell[niches_df.niche==clust]) for p in pairCatDFdir.cell_pairs], 'niche_pairs']=clust+'->'+clust
 
     for comb in list(itertools.permutations(list(niches_df.niche.unique().sort_values()), 2)):
-        pairCatDFdir['niche_pairs'][[(p.split('->')[0] in niches_df.cell[niches_df.niche==comb[0]]) & (p.split('->')[1] in niches_df.cell[niches_df.niche==comb[1]]) for p in pairCatDFdir.cell_pairs]]=comb[0]+'->'+comb[1]
+        pairCatDFdir.loc[[(p.split('->')[0] in niches_df.cell[niches_df.niche==comb[0]]) & (p.split('->')[1] in niches_df.cell[niches_df.niche==comb[1]]) for p in pairCatDFdir.cell_pairs], 'niche_pairs']=comb[0]+'->'+comb[1]
 
     return pairCatDFdir
 #%%
@@ -385,10 +385,10 @@ def getColocFilter(pairCatDF, adj, oneCTints):
     colocFilt['filter']=0
 
     for i in pairCatDF.cell_pairs:
-        colocFilt['filter'][i]=adj.loc[i.split('->')[1],i.split('->')[0]]
+        colocFilt.loc[i, 'filter']=adj.loc[i.split('->')[1],i.split('->')[0]]
     
-    colocFilt['filter'][oneCTints]=1
-    colocFilt['filter'][colocFilt['filter']>0]=1
+    colocFilt.loc[oneCTints, 'filter']=1
+    colocFilt.loc[colocFilt['filter']>0, 'filter']=1
     colocFilt=pd.DataFrame(colocFilt['filter'], index=colocFilt.index, columns=['filter'])
     return colocFilt
 
