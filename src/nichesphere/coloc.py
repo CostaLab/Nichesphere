@@ -317,52 +317,68 @@ def OvsE_coloc_test(observedColocProbs, expectedColocProbs, cell_types, testDist
 
 #%%
 
-def OvsE_coloc_test_adjPval(observedColocProbs, expectedColocProbs, testDistribution_df, cell_types, oneCTinteractions, p=0.05, MTcorrection='fdr_bh'):
-    """ Observed vs Expected log2 ratios filtered by p-value obtained from comparing them against a background distribution
+def OvsE_coloc_test_adjPval(observedColocProbs, expectedColocProbs, testDistribution_df, cell_types,
+                    oneCTinteractions, p=0.05, MTcorrection='fdr_bh', pseudocount=1e-10):
+    """Observed vs Expected log2 ratios filtered by adjusted p-value from a per-pair background distribution.
+
     Parameters
     ----------
     observedColocProbs : pd.Series
-        observed cell type pair co-localization probabilities in a sample/condition
+        Observed cell type pair co-localization probabilities in a sample/condition.
     expectedColocProbs : pd.Series
-        expected cell type pair co-localization probabilities in a sample/condition
-    cell_types : list 
-        list of cell types (sorted as in observedColocProbs)
+        Expected cell type pair co-localization probabilities in the same sample/condition.
     testDistribution_df : pd.DataFrame
-        Data frame with distributions of observed vs expected ratios per cell type pair as columns, obtained from random sampling pairs of single cells
-        from scRNA data from the same sample/condition (obtained generally from function 'get_PIC_BG_OEratios_DF')
-        from the tl module
+        Background distribution of O/E ratios: rows are bootstrap iterations, columns are cell type
+        pairs (as returned by ``nichesphere.tl.get_PIC_BG_OEratios_DF``).
+    cell_types : list
+        List of cell types in the same order as ``observedColocProbs``.
     oneCTinteractions : list
-        list of single cell interactions (celltype-celltype)
-    p : float (default: 0.05)
-        values must have a p-value lower than this to be considered significant
-    MTcorrection : str (default: 'fdr_bh')
-        Multiple testing correction to be applied to p-values 
+        List of same-cell-type interactions (``cellType-cellType``) to exclude from scoring.
+    p : float, default 0.05
+        Adjusted p-value threshold; pairs above this are set to 0.
+    MTcorrection : str, default 'fdr_bh'
+        Multiple-testing correction method passed to ``statsmodels.multipletests``.
+    pseudocount : float, default 1e-10
+        Small value added to numerator and denominator before computing O/E ratios to avoid
+        division by zero or log(0).
+
     Returns
     -------
     OvsE_HMdf : pd.DataFrame
-        cell types x cell types data frame of log2 observed/expected significant values (scores) for each cell cell interaction
+        Cell types × cell types matrix of log2(O/E) scores; non-significant and
+        same-cell-type values are set to 0.
     statsDF : pd.DataFrame
-        cell type pairs resulting statistic (log2 O/E score) , p-value and adjusted p-value
+        Per-pair statistics with columns ``statistic`` (log2 O/E), ``pvalue``, and
+        ``adjusted_pvalue``.
     """
-    
-    OvsE=observedColocProbs/expectedColocProbs
-    OvsE_HM=np.log2(OvsE)
-    pvals=pd.Series([scipy.stats.percentileofscore(np.log2(testDistribution_df[x]), OvsE_HM[x], kind='weak')/100 for x in OvsE_HM.index])
-    
-    pvals[pvals>0.5]=1-pvals[pvals>0.5]
-    pvals=pvals*2
-    pvals_corr=multipletests(pvals, alpha=0.05, method=MTcorrection, maxiter=1, is_sorted=False, returnsorted=False)[1]
-    
-    OvsE_HM[(pvals_corr>p)]=0
-    OvsE_HM[oneCTinteractions]=0
-    
-    OvsE_HMdf=pd.DataFrame(np.array(OvsE_HM).reshape(-1, len(cell_types)))
-    OvsE_HMdf.columns=cell_types
-    OvsE_HMdf.index=cell_types
-    statsDF=pd.DataFrame({'statistic':list(OvsE_HM), 'pvalue':list(pvals), 'adjusted_pvalue':list(pvals_corr)})
-    statsDF.index=observedColocProbs.index
-    
-    return OvsE_HMdf,statsDF
+    OvsE = (observedColocProbs + pseudocount) / (expectedColocProbs + pseudocount)
+    OvsE_HM = np.log2(OvsE)
+
+    pvals = pd.Series([
+        scipy.stats.percentileofscore(np.log2(testDistribution_df[x] + pseudocount),
+                                      OvsE_HM[x], kind='weak') / 100
+        for x in OvsE_HM.index
+    ])
+    pvals[pvals > 0.5] = 1 - pvals[pvals > 0.5]
+    pvals = pvals * 2
+    pvals_corr = multipletests(pvals, alpha=0.05, method=MTcorrection,
+                               maxiter=1, is_sorted=False, returnsorted=False)[1]
+
+    OvsE_HM[pvals_corr > p] = 0
+    OvsE_HM[oneCTinteractions] = 0
+
+    OvsE_HMdf = pd.DataFrame(np.array(OvsE_HM).reshape(-1, len(cell_types)))
+    OvsE_HMdf.columns = cell_types
+    OvsE_HMdf.index = cell_types
+
+    statsDF = pd.DataFrame({
+        'statistic': list(OvsE_HM),
+        'pvalue': list(pvals),
+        'adjusted_pvalue': list(pvals_corr)
+    })
+    statsDF.index = observedColocProbs.index
+
+    return OvsE_HMdf, statsDF
 #%%
 
 def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, clist=None, 

@@ -180,132 +180,219 @@ def PIC_BGdoubletsOEratios(adata_singlets, annot_col):
 
 #%%
 
-def PIC_BGdoubletsOEratios_parallel(seed, adata, annot_col, target_pairs):
+def downsample_class(data, target_class, factor=6):
+    """Reduce the number of elements belonging to ``target_class`` by a given factor.
+
+    Useful when certain cell types are over-represented in the gated singlets data relative
+    to their true in-tissue proportions, before building a background doublet distribution.
+
+    Parameters
+    ----------
+    data : list
+        Full list of cell type labels (one entry per cell).
+    target_class : list
+        Cell types to downsample.
+    factor : int, default 6
+        Reduction factor; the number of target-class elements is divided by this value.
+
+    Returns
+    -------
+    list
+        Combined list of non-target elements plus the downsampled target elements,
+        in their original relative order.
+    """
+    target_elements = [x for x in data if x in target_class]
+    other_elements = [x for x in data if x not in target_class]
+    keep_count = len(target_elements) // factor
+    return other_elements + target_elements[:keep_count]
+
+#%%
+
+def PIC_BGdoubletsOEratios_parallel(seed, adata, annot_col, target_pairs,
+                                     downsample_cells=False, cell_list_downsample=None,
+                                     downsampling_factor=6, pseudocount=1e-10):
     
-    """Generate set of O/E ratios for colocalization probabilities of cell type pairs based on randomly paired single cells.
-    n runs of this function generate distributions of n values for each cell type pair, which can be used for tests in PIC-seq data or datasets with one sample
-    
+    """Generate one set of O/E ratios for cell type pair co-localization probabilities from
+    randomly paired single cells.  Running this function *n* times (e.g. via
+    ``get_PIC_BG_OEratios_DF``) builds a per-pair empirical background distribution that
+    can be used for significance testing in PIC-seq data or single-sample datasets.
+
     Parameters
     ----------
     seed : int
-        seed for generating random distributions
+        Random seed for reproducibility.
     adata : AnnData
-        anndata object containing singlets (scRNA-seq) data
+        Singlets (scRNA-seq) anndata object.
     annot_col : str
-        name of the cell type annotation column in the anndata object obs
-    target_pairs : list or pd.DataFrame
-        list of cell type pairs to be evaluated
+        Name of the cell type annotation column in ``adata.obs``.
+    target_pairs : list or pd.Index
+        Cell type pairs to evaluate (e.g. ``colocPerSample.columns``).
+    downsample_cells : bool, default False
+        Whether to downsample over-represented cell types before pairing.
+        Useful when the gated singlets data does not reflect true in-tissue proportions.
+    cell_list_downsample : list or None, default None
+        Cell types to downsample (used only when ``downsample_cells=True``).
+    downsampling_factor : int, default 6
+        Reduction factor passed to :func:`downsample_class`
+        (used only when ``downsample_cells=True``).
+    pseudocount : float, default 1e-10
+        Small value added to observed and expected counts before division to avoid
+        division-by-zero or log(0) in downstream steps.
 
     Returns
     -------
     oe_ratios : pd.Series
-        set of O/E ratios for colocalization probabilities of cell type pairs in randomly paired single cells
+        O/E ratios for each pair in ``target_pairs``, indexed by pair name.
     """
-    
-    # Initialize a local random generator with the specific seed
+    if cell_list_downsample is None:
+        cell_list_downsample = []
+
     random.seed(seed)
-    # 1. Shuffle to randomize the order
-    my_list=list(adata.obs[annot_col])
+    my_list = list(adata.obs[annot_col])
     random.shuffle(my_list)
-    # 2. Pair them up and format into strings
+
+    if downsample_cells:
+        my_list = downsample_class(my_list, target_class=cell_list_downsample,
+                                   factor=downsampling_factor)
+
     it = iter(my_list)
     observed_pairs = [f"{a}-{b}" for a, b in zip(it, it)]
 
-    # 3. Calculate Observed Frequencies
     obs_counts = Counter(observed_pairs)
     total_gen = len(observed_pairs)
-    
-    # 4. Calculate Expected Frequencies
-    # Expected = P(Item1) * P(Item2 | Item1) * Total Pairs
+
     item_counts = Counter(my_list)
     n = len(my_list)
 
     def calculate_ratio(pair_str):
         try:
             a, b = pair_str.split('-')
-            # Probability of A then B
             p_a = item_counts[a] / n
             p_b = (item_counts[b] - (1 if a == b else 0)) / (n - 1)
             expected = p_a * p_b * total_gen
-            
             observed = obs_counts.get(pair_str, 0)
-            return observed / expected if expected > 0 else 0.0
-        except:
+            return (observed + pseudocount) / (expected + pseudocount)
+        except Exception:
             return 0.0
 
-    # 5. Create the Pandas Series
     oe_ratios = pd.Series(
         {pair: calculate_ratio(pair) for pair in target_pairs},
         name="OE_Ratio"
     )
-    
-    #t=pd.Series(random_strings)
     return oe_ratios
 #%%
 
-def get_PIC_BG_OEratios_DF(adata, annot_col, target_pairs, nreps=1000, njobs=10):
-    """Generate nreps sets of O/E ratios for colocalization probabilities of cell type pairs based on randomly paired single cells via the PIC_BGdoubletsOEratios_parallel function.
-    Depending on nreps this function generate that number of sets of O/E values for each cell type pair, which can be used for tests based on empirical p-values in PIC-seq data or datasets with one sample
-    
+def get_PIC_BG_OEratios_DF(adata, annot_col, target_pairs, nreps=1000, njobs=10,
+                            downsample_cells=False, cell_list_downsample=None,
+                            downsampling_factor=6, pseudocount=1e-10):
+    """Generate *nreps* sets of O/E ratios for cell type pair co-localization probabilities
+    by running :func:`PIC_BGdoubletsOEratios_parallel` in parallel.
+
     Parameters
     ----------
     adata : AnnData
-        anndata object containing singlets (scRNA-seq) data
+        Singlets (scRNA-seq) anndata object.
     annot_col : str
-        name of the cell type annotation column in the anndata object obs
-    target_pairs : list or pd.DataFrame
-        list of cell type pairs to be evaluated
-    nreps : int (default: 1000)
-        number of sets of O/E values to obtain for each cell type pair
-    njobs : int (default: 10)
-        number of parallel jobs to be executed
+        Name of the cell type annotation column in ``adata.obs``.
+    target_pairs : list or pd.Index
+        Cell type pairs to evaluate.
+    nreps : int, default 1000
+        Number of random background iterations.
+    njobs : int, default 10
+        Number of parallel jobs (passed to ``joblib.Parallel``).
+    downsample_cells : bool, default False
+        Downsample over-represented cell types before pairing (see
+        :func:`downsample_class`).
+    cell_list_downsample : list or None, default None
+        Cell types to downsample (used only when ``downsample_cells=True``).
+    downsampling_factor : int, default 6
+        Reduction factor for downsampling.
+    pseudocount : float, default 1e-10
+        Pseudocount passed to :func:`PIC_BGdoubletsOEratios_parallel`.
 
     Returns
     -------
     df : pd.DataFrame
-        Data frame of nreps rows , which will be sets of O/E ratios for colocalization probabilities of cell type pairs in randomly paired single cells
+        DataFrame of shape (*nreps*, n_pairs); each row is one set of O/E ratios and
+        each column corresponds to a cell type pair.
     """
+    if cell_list_downsample is None:
+        cell_list_downsample = []
+
     t = time.time()
-    res=Parallel(n_jobs=njobs)(delayed(PIC_BGdoubletsOEratios_parallel)(seed=i, adata=adata, annot_col=annot_col, target_pairs=target_pairs) for i in range(nreps))
+    res = Parallel(n_jobs=njobs)(
+        delayed(PIC_BGdoubletsOEratios_parallel)(
+            seed=i, adata=adata, annot_col=annot_col, target_pairs=target_pairs,
+            downsample_cells=downsample_cells,
+            cell_list_downsample=cell_list_downsample,
+            downsampling_factor=downsampling_factor,
+            pseudocount=pseudocount
+        )
+        for i in range(nreps)
+    )
     df = pd.concat(res, axis=1).T
     print(time.time() - t)
     return df
 #%%
 
-def getExpectedColocProbsFromSCs(sc_adata, sample, cell_types, sc_data_sampleCol, sc_adata_annotationCol):
-    """Compute the expected probability of each cell type pair to occur in a specific condition by multiplying cell type proportions from 
-    the single cell data
+def getExpectedColocProbsFromSCs(cell_types, sc_adata=None, sample=None,
+                                  sc_data_sampleCol=None, sc_adata_annotationCol=None,
+                                  annot_series=None):
+    """Compute the expected co-localization probability of each cell type pair by multiplying
+    cell type proportions derived from single-cell (singlets) data.
+
+    Two calling modes are supported:
+
+    * **AnnData mode** – pass ``sc_adata``, ``sample``, ``sc_data_sampleCol``, and
+      ``sc_adata_annotationCol``.  The function extracts the annotation column for the
+      requested condition internally.
+    * **Series mode** – pass a pre-processed ``annot_series`` (e.g. after applying
+      :func:`downsample_class`).  This is useful when cell type frequencies need to be
+      adjusted before computing expected probabilities.
 
     Parameters
     ----------
-    sc_adata : AnnData
-        anndata object containing singlets (scRNA-seq) data
-    sample : str
-        name of the sample/condition to be tested
     cell_types : pd.Series or list
-        list/series of cell types 
-    sc_data_sampleCol : str
-        name of the column in the obs of the anndata object where the sample/condition is indicated 
-    sc_adata_annotationCol : str
-        name of the cell type column in the obs of the anndata object
+        Ordered list of cell types (same order as the co-localization data columns).
+    sc_adata : AnnData or None, default None
+        Singlets anndata object (AnnData mode only).
+    sample : str or None, default None
+        Condition/sample name to subset ``sc_adata`` (AnnData mode only).
+    sc_data_sampleCol : str or None, default None
+        Column in ``sc_adata.obs`` indicating the condition (AnnData mode only).
+    sc_adata_annotationCol : str or None, default None
+        Column in ``sc_adata.obs`` containing cell type labels (AnnData mode only).
+    annot_series : pd.Series or None, default None
+        Pre-processed series of cell type labels, one entry per cell (Series mode only).
+        Takes precedence over AnnData mode when provided.
 
     Returns
     -------
     scCTpairsProbs : pd.DataFrame
-        Dataframe of expected co-localization probabilities per cell type pair.
-        Cell type pairs as indexes and a 'count' column
+        Expected co-localization probabilities per cell type pair.
+        Cell type pairs as index, single column named ``'count'``.
     """
-    
-    scCTprops=sc_adata.obs[sc_adata_annotationCol][sc_adata.obs[sc_data_sampleCol]==sample].value_counts()[cell_types]/sc_adata.obs[sc_adata_annotationCol][sc_adata.obs[sc_data_sampleCol]==sample].value_counts().sum()
-    scCTpairsProbs=pd.DataFrame()
-    
+    if annot_series is not None:
+        ann = annot_series
+    elif sc_adata is not None:
+        mask = sc_adata.obs[sc_data_sampleCol] == sample
+        ann = sc_adata.obs[sc_adata_annotationCol][mask]
+    else:
+        raise ValueError(
+            "Provide either 'sc_adata' (with sample/sc_data_sampleCol/sc_adata_annotationCol) "
+            "or 'annot_series'."
+        )
+
+    scCTprops = ann.value_counts()[cell_types] / ann.value_counts().sum()
+    scCTpairsProbs = pd.DataFrame()
+
     for x in scCTprops:
-        scCTpairsProbs=pd.concat([scCTpairsProbs, pd.DataFrame(x*scCTprops)])
-        
-    pci=[]
+        scCTpairsProbs = pd.concat([scCTpairsProbs, pd.DataFrame(x * scCTprops)])
+
+    pci = []
     for x in scCTprops.index:
-        pci.append((x+'-'+scCTprops.index.astype(str)).tolist())    
-    scCTpairsProbs.index=[item for sublist in pci for item in sublist]
+        pci.append((x + '-' + scCTprops.index.astype(str)).tolist())
+    scCTpairsProbs.index = [item for sublist in pci for item in sublist]
     return scCTpairsProbs
 #%%
     
@@ -505,6 +592,94 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
         for node_id in g.nodes:
             node = g.nodes[node_id]
             node['size_pagerank'] = 10 + node_pr[node_id] * 100
-            
-            
+                     
 #%%
+
+def compute_network_stats(G):
+    """Compute standard centrality statistics for a (signed) NetworkX graph.
+
+    Calculates betweenness centrality, PageRank (unweighted), and total degree
+    centrality, as well as degree centrality split into positive-edge degree and
+    negative-edge degree.
+
+    Parameters
+    ----------
+    G : nx.Graph
+        Graph with numeric edge weights (positive = enriched co-localization or
+        communication, negative = depleted).
+
+    Returns
+    -------
+    nw_stats : pd.DataFrame
+        DataFrame indexed by node with columns:
+        ``betweenness``, ``degree``, ``pagerank``,
+        ``degree_positive``, ``degree_negative``.
+    """
+    nodes = list(G.nodes)
+    nw_stats = pd.DataFrame({
+        'betweenness': [nx.betweenness_centrality(G)[n] for n in nodes],
+        'degree':      [nx.degree_centrality(G)[n] for n in nodes],
+        'pagerank':    [nx.pagerank(G, weight=None)[n] for n in nodes],
+    }, index=nodes)
+
+    G_pos = G.copy()
+    G_pos.remove_edges_from(
+        [(a, b) for a, b, attrs in G_pos.edges(data=True) if attrs['weight'] <= 0]
+    )
+    deg_pos = pd.Series(nx.degree_centrality(G_pos), name='degree_positive')
+
+    G_neg = G.copy()
+    G_neg.remove_edges_from(
+        [(a, b) for a, b, attrs in G_neg.edges(data=True) if attrs['weight'] >= 0]
+    )
+    deg_neg = pd.Series(nx.degree_centrality(G_neg), name='degree_negative')
+
+    nw_stats = pd.concat([nw_stats, deg_pos.loc[nodes], deg_neg.loc[nodes]], axis=1)
+    nw_stats.columns = ['betweenness', 'degree', 'pagerank',
+                        'degree_positive', 'degree_negative']
+    return nw_stats
+
+#%%
+
+def plot_top_stats(nw_stats, top_n=None, title_suffix=''):
+    """Bar plots of the top nodes by betweenness, PageRank, and signed degree centrality.
+
+    Parameters
+    ----------
+    nw_stats : pd.DataFrame
+        Output of :func:`compute_network_stats`.
+    top_n : int or None, default None
+        If provided, only the top *n* nodes by each metric are shown.
+        If ``None``, all nodes are shown (useful for small networks).
+    title_suffix : str, default ''
+        Optional string appended to each subplot title (e.g. a process category name).
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure containing four bar-plot axes (betweenness, PageRank,
+        positive degree, negative degree).
+    """
+    import seaborn as sns
+    cols_colors = [
+        ('betweenness',    'purple'),
+        ('pagerank',       'purple'),
+        ('degree_positive','red'),
+        ('degree_negative','blue'),
+    ]
+    titles = [
+        f'Betweenness {title_suffix}',
+        f'Pagerank {title_suffix}',
+        f'Degree_positive {title_suffix}',
+        f'Degree_negative {title_suffix}',
+    ]
+
+    fig, axes = plt.subplots(1, 4, figsize=(28, 4 if top_n else 7))
+    for ax, (col, color), title in zip(axes, cols_colors, titles):
+        d = nw_stats.sort_values(col, ascending=False)
+        if top_n:
+            d = d.iloc[:top_n]
+        sns.barplot(ax=ax, y=d.index, x=col, data=d, color=color)
+        ax.set_title(title)
+    fig.tight_layout()
+    return fig
