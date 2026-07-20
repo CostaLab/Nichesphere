@@ -595,7 +595,7 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
                      
 #%%
 
-def compute_network_stats(G):
+def compute_network_stats(G, signed=True):
     """Compute standard centrality statistics for a (signed) NetworkX graph.
 
     Calculates betweenness centrality, PageRank (unweighted), and total degree
@@ -618,7 +618,6 @@ def compute_network_stats(G):
     nodes = list(G.nodes)
     nw_stats = pd.DataFrame({
         'betweenness': [nx.betweenness_centrality(G)[n] for n in nodes],
-        'degree':      [nx.degree_centrality(G)[n] for n in nodes],
         'pagerank':    [nx.pagerank(G, weight=None)[n] for n in nodes],
     }, index=nodes)
 
@@ -635,8 +634,21 @@ def compute_network_stats(G):
     deg_neg = pd.Series(nx.degree_centrality(G_neg), name='degree_negative')
 
     nw_stats = pd.concat([nw_stats, deg_pos.loc[nodes], deg_neg.loc[nodes]], axis=1)
-    nw_stats.columns = ['betweenness', 'degree', 'pagerank',
+    nw_stats.columns = ['betweenness', 'pagerank',
                         'degree_positive', 'degree_negative']
+
+    if signed:
+        t3=pd.DataFrame({'betweenness_pos':[nx.betweenness_centrality(G_pos)[x] for x in list(G_pos.nodes)], 
+                 'pagerank_pos':[nx.pagerank(G_pos)[x] for x in list(G_pos.nodes)]})
+        t3.index=list(G_pos.nodes)
+
+        t4=pd.DataFrame({'betweenness_neg':[nx.betweenness_centrality(G_neg)[x] for x in list(G_neg.nodes)], 
+                        'pagerank_neg':[nx.pagerank(G_neg)[x] for x in list(G_neg.nodes)]})
+        t4.index=list(G_neg.nodes)
+
+        nw_stats['betweenness']=np.log2((1e-10+t3.betweenness_pos)/(1e-10+t4.betweenness_neg))
+        nw_stats['pagerank']=np.log2((1e-10+t3.pagerank_pos)/(1e-10+t4.pagerank_neg))
+
     return nw_stats
 
 #%%
