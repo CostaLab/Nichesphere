@@ -6,4 +6,5 @@ from . import tl
 from . import coloc
 from . import comm
 from . import niche_stats
+from . import sankey_plot
 #from . import pl
