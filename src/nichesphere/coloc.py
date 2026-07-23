@@ -10,6 +10,7 @@ import scanpy as sc
 from matplotlib.colors import ListedColormap
 
 from statsmodels.stats.multitest import multipletests
+from sklearn.neighbors import NearestNeighbors
 
 
 def cellCatContained(pair, cellCat):
@@ -68,6 +69,148 @@ def getColocProbs(CTprobs, spotSamples):
         CTcolocalizationP = pd.concat([CTcolocalizationP, CTcoloc_P])
     
     return CTcolocalizationP
+
+# %%
+def compute_sc_spatial_knn_coloc_matrix(adata, cluster_col, k=5):
+
+    """
+    Compute a kNN-based co-localization probability matrix between cell type pairs.
+
+    For each cell, the k nearest spatial neighbors are identified. The co-localization
+    matrix counts how often each cluster appears in the neighborhood of each other
+    cluster, then normalizes counts to obtain interaction probabilities.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Spatial AnnData object. Must contain cell centroid coordinates in
+        ``adata.obsm['spatial']`` and a categorical cluster annotation column in
+        ``adata.obs``.
+    cluster_col : str
+        Name of the categorical column in ``adata.obs`` containing cluster labels.
+    k : int, default 5
+        Number of nearest spatial neighbors to consider per cell (excluding self).
+
+    Returns
+    -------
+    pd.DataFrame
+        Symmetric co-localization probability matrix of shape
+        (n_clusters, n_clusters). Entry (i, j) is the probability of finding
+        cluster j in the k-nearest neighborhood of cluster i, normalized so
+        that all entries sum to 1.
+
+    Notes
+    -----
+    The ``cluster_col`` column must be of dtype ``category``; cluster order
+    follows ``adata.obs[cluster_col].cat.categories``.
+
+    Examples
+    --------
+    >>> coloc = compute_sc_spatial_knn_coloc_matrix(adata, cluster_col='cell_type', k=10)
+    >>> sns.heatmap(coloc, cmap='Blues')
+    """
+    # Extract centroids of polygons
+    coords=adata.obsm['spatial']
+
+    # Fit kNN model
+    ### Try radius??
+    nbrs = NearestNeighbors(n_neighbors=k+1, algorithm='ball_tree').fit(coords)
+    _, indices = nbrs.kneighbors(coords)
+
+    # Get cluster labels
+    cluster_labels = adata.obs[cluster_col].values
+    #unique_clusters = np.unique(cluster_labels)
+    unique_clusters = adata.obs[cluster_col].cat.categories
+
+    # Initialize colocalization matrix
+    cluster_index = {c: i for i, c in enumerate(unique_clusters)}
+    colocalization_matrix = np.zeros((len(unique_clusters), len(unique_clusters)), dtype=int)
+
+    # Populate the matrix
+    for i, neighbors in enumerate(indices):
+        cluster_i = cluster_labels[i]
+        for neighbor in neighbors[1:]:  # Exclude self (first neighbor)
+            cluster_j = cluster_labels[neighbor]
+            colocalization_matrix[cluster_index[cluster_i], cluster_index[cluster_j]] += 1
+    W = colocalization_matrix
+    W = W/W.sum() ## Prob to find an boundary
+    # Convert to a Pandas DataFrame for readability
+    colocalization_df = pd.DataFrame(W, index=unique_clusters, columns=unique_clusters)
+    
+    return colocalization_df
+
+# %%
+
+def compute_sc_spatial_radius_coloc_matrix(adata, cluster_col, radius=40.0):
+
+    """
+    Compute a radius-based co-localization probability matrix between cell type pairs.
+
+    For each cell, all neighbors within a fixed spatial radius are identified.
+    Interaction counts are symmetrized (so that A→B and B→A are treated equally)
+    and normalized to obtain interaction probabilities.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Spatial AnnData object. Must contain cell centroid coordinates in
+        ``adata.obsm['spatial']`` and a categorical cluster annotation column in
+        ``adata.obs``.
+    cluster_col : str
+        Name of the categorical column in ``adata.obs`` containing cluster labels.
+    radius : float, default 40.0
+        Spatial radius within which two cells are considered co-localized.
+        Units match those of ``adata.obsm['spatial']`` (e.g. pixels or micrometers).
+
+    Returns
+    -------
+    pd.DataFrame
+        Symmetric co-localization probability matrix of shape
+        (n_clusters, n_clusters). Entry (i, j) is the symmetrized probability
+        of finding cluster j within ``radius`` of cluster i, normalized so
+        that all entries sum to 1.
+
+    Notes
+    -----
+    The ``cluster_col`` column must be of dtype ``category``; cluster order
+    follows ``adata.obs[cluster_col].cat.categories``.
+
+    Unlike ``compute_sc_spatial_knn_coloc_matrix``, this function uses a fixed spatial
+    radius rather than a fixed number of neighbors, making it more suitable for
+    datasets where cell density varies across the tissue.
+
+    Examples
+    --------
+    >>> coloc = compute_sc_spatial_radius_coloc_matrix(adata, cluster_col='cell_type', radius=300.0)
+    >>> sns.heatmap(coloc, cmap='Blues')
+    """
+
+    coords = adata.obsm['spatial']
+    nbrs = NearestNeighbors(radius=radius, algorithm='kd_tree').fit(coords)
+    indices = nbrs.radius_neighbors(coords, return_distance=False)
+
+    cluster_labels = adata.obs[cluster_col].values
+    categories = adata.obs[cluster_col].cat.categories
+    cluster_to_idx = {cat: i for i, cat in enumerate(categories)}
+    
+    n = len(categories)
+    mat = np.zeros((n, n))
+
+    for i, neighbors in enumerate(indices):
+        # map current cell label to index
+        row = cluster_to_idx[cluster_labels[i]]
+        for nb in neighbors:
+            if i == nb: continue # ignore self
+            col = cluster_to_idx[cluster_labels[nb]]
+            mat[row, col] += 1
+
+    # Symmetrize and Normalize
+    mat = (mat + mat.T) / 2
+    total = mat.sum()
+    if total > 0:
+        mat = mat / total
+
+    return pd.DataFrame(mat, index=categories, columns=categories)
 
 # %%
 def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   
