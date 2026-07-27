@@ -34,7 +34,7 @@ def cellCatContained(pair, cellCat):
 
 #%%
 
-def getColocProbs(CTprobs, spotSamples):
+def getColocProbs_old(CTprobs, spotSamples):
 
     """Get co-localization probabilities 
     (sum across spots of probabilities of each cell type pair being in the same spot)
@@ -69,6 +69,28 @@ def getColocProbs(CTprobs, spotSamples):
         CTcolocalizationP = pd.concat([CTcolocalizationP, CTcoloc_P])
     
     return CTcolocalizationP
+
+# %%
+
+def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series) -> pd.DataFrame:
+    """Vectorized calculation of cell type co-localization probabilities per sample."""
+    results = []
+
+    # Group CTprobs by spotSamples directly (avoids repeated index filtering)
+    for smple, group in CTprobs.groupby(spotSamples):
+        n_spots = len(group)
+        if n_spots == 0:
+            continue
+        
+        # Matrix multiplication: (CellTypes x Spots) @ (Spots x CellTypes)
+        coloc_mat = (group.T.values @ group.values) / n_spots
+        
+        # Build panel dataframe for this sample
+        df_smple = pd.DataFrame(coloc_mat, index=group.columns, columns=group.columns)
+        df_smple["sample"] = smple
+        results.append(df_smple)
+
+    return pd.concat(results, axis=0) if results else pd.DataFrame()
 
 # %%
 def compute_sc_spatial_knn_coloc_matrix(adata, cluster_col, k=5):
