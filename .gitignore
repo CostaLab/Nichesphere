@@ -4,3 +4,8 @@ __pycache__/
 dist/
 build/
 .eggs/
+data/
+figures/
+results/
+.ipynb_checkpoints/
+*.pyc
