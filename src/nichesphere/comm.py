@@ -64,7 +64,7 @@ def calculate_LR_CT_pair_scores_dir(ccommTable, LRscoresCol):
     scores = ccommTable[LRscoresCol].groupby(ccommTable['allpair']).sum()
     return scores
 #%%
-def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
+def lr_ctPairScores_perCat_dir_old(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
     """Calculate cell communication scores per ligand category from a database
     
     Parameters
@@ -114,8 +114,86 @@ def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchC
         
     return CTpairScores_byCat
 
+# %%
 
-#%%
+def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchCol, ccommLRscoresCol, oneCTinteractions, condition, pairCatDF):
+    """Calculate cell communication scores per ligand category from a database
+    
+    Parameters
+    ----------
+    ccommTable : pd.DataFrame
+        Condition specific cell - cell communication table (output from CrossTalkeR)
+    db : pd.DataFrame
+        database table with information about element (ligand or receptor or both) category (eg: biological processes)
+    dbCatCol : str
+        column in the database table containing the category (eg: biological process) with which the ligands/receptors/LR pairs are associated
+    dbMatchCol : str
+        column in the database table containing the elements (ligands/receptors/LR pairs) associated to the categories
+    ccommMatchCol : str
+        column in the ccommTable table containing the elements (ligands/receptors/LR pairs) associated to the categories
+    ccommLRscoresCol : str
+        name of the ccommTable column where the LR scores are (usually 'MeanLR' for CrossTalkeR)
+    oneCTinteractions : list
+        list of single cell interactions (celltype@celltype)
+    condition : str
+        name of the analyzed condition (a column with this string will be added to the resulting table)
+    pairCatDF : pd.DataFrame
+        dataframe of cell pairs and corresponding co-localization niche pairs
+    Returns
+    -------
+    CTpairScores_byCat : pd.DataFrame
+        cell communication table with new columns 'cell_pairs', 'niche_pairs', 'LRcat' and 'condition'
+    """
+
+    # 1. Clean up db match keys
+    db_clean = db[[dbCatCol, dbMatchCol]].drop_duplicates().copy()
+    db_clean[dbMatchCol] = db_clean[dbMatchCol].astype(str).str.lower()
+
+    # 2. Filter ccommTable against oneCTinteractions
+    ccomm_filtered = ccommTable[
+        ~ccommTable["cellpair"].isin(oneCTinteractions)
+    ].copy()
+    ccomm_filtered["match_key"] = (
+        ccomm_filtered[ccommMatchCol].astype(str).str.lower()
+    )
+
+    # 3. Merge ccommTable with db to associate categories with interactions
+    merged = ccomm_filtered.merge(
+        db_clean, left_on="match_key", right_on=dbMatchCol, how="inner"
+    )
+
+    if merged.empty:
+        return pd.DataFrame()
+
+    # 4. Perform vector sum across BOTH Category and 'allpair' simultaneously
+    # This replaces calling calculate_LR_CT_pair_scores_dir in a loop!
+    grouped_scores = (
+        merged.groupby([dbCatCol, "allpair"])[ccommLRscoresCol]
+        .sum()
+        .reset_index()
+    )
+
+    # 5. Extract cellpair (ct1->ct2) using vectorized string methods
+    split_idx = grouped_scores["allpair"].str.split("/")
+    ct1 = split_idx.str[0]
+    ct2 = split_idx.str[1].str.split("@").str[1]
+    grouped_scores["cellpair"] = ct1 + "->" + ct2
+
+    # 6. Map pairCatDF annotations directly using indexed lookup/merge
+    pairCat_indexed = pairCatDF.set_index("cell_pairs")
+    matched_cats = pairCat_indexed.loc[grouped_scores["cellpair"]].reset_index(
+        drop=True
+    )
+
+    # 7. Construct final result dataframe
+    result = matched_cats.copy()
+    result.index = grouped_scores["allpair"]
+    result["LRscores"] = grouped_scores[ccommLRscoresCol].values
+    result["LRcat"] = grouped_scores[dbCatCol].values
+    result["condition"] = condition
+
+    return result
+# %%
 
 def equalizeScoresTables(ctrlTbl, expTbl, ctrlCondition, expCondition):
     """Makes communication score tables contain the same interactions through adding 0s to be compared
@@ -151,7 +229,7 @@ def equalizeScoresTables(ctrlTbl, expTbl, ctrlCondition, expCondition):
 
     return ctrlTbl, expTbl
 #%%
-def diffCcommStats(c1CTpairScores_byCat, c2CTpairScores_byCat, cellCatCol):
+def diffCcommStats_old(c1CTpairScores_byCat, c2CTpairScores_byCat, cellCatCol):
     """Differential cell communication per LR category (eg: biological process)
     
     Parameters
@@ -180,7 +258,75 @@ def diffCcommStats(c1CTpairScores_byCat, c2CTpairScores_byCat, cellCatCol):
         diffCommTable=pd.concat([diffCommTable, tmp])
     
     return diffCommTable
-#%%
+# %%
+
+def diffCcommStats(c1CTpairScores_byCat, c2CTpairScores_byCat, cellCatCol):
+    """Differential cell communication per LR category (eg: biological process)
+    
+    Parameters
+    ----------
+    c1CTpairScores_byCat : pd.DataFrame
+        exp cell communication table with all interactions
+    c2CTpairScores_byCat : pd.DataFrame
+        control cell communication table with all interactions
+    cellCatCol : str
+        name of the column in the communication tables containing the cell pair grouping we would like to compare
+        (eg: 'niche_pairs', 'cell_pairs')
+    Returns
+    -------
+    diffCommTable : pd.DataFrame
+        dataframe of Wilcoxon statictics and p-values for each cell pair grouping in each LR category (eg: biological process)
+        columns are named 'wilcoxStat', 'wilcoxPval', 'cellCat' and 'LRcat'
+    
+    """
+
+    # 1. Pre-group data into lookup dictionaries keyed by (LRcat, cellCat)
+    # This extracts matching score arrays in O(1) time without repeated boolean masks
+    g1 = dict(
+        tuple(
+            c1CTpairScores_byCat.groupby(["LRcat", cellCatCol])["LRscores"]
+        )
+    )
+    g2 = dict(
+        tuple(
+            c2CTpairScores_byCat.groupby(["LRcat", cellCatCol])["LRscores"]
+        )
+    )
+
+    # 2. Pre-extract unique values once
+    lr_categories = c1CTpairScores_byCat["LRcat"].unique()
+    cell_categories = c1CTpairScores_byCat[cellCatCol].unique()
+
+    # Empty array/list to collect results in one pass
+    records = []
+
+    # 3. Iterate through category pairs with O(1) dictionary lookups
+    for lr_cat in lr_categories:
+        for cell_cat in cell_categories:
+            # Grab scores or empty array if key combination doesn't exist
+            scores1 = g1.get((lr_cat, cell_cat), pd.Series(dtype=float)).values
+            scores2 = g2.get((lr_cat, cell_cat), pd.Series(dtype=float)).values
+
+            # Only compute ranksums if both groups have observations
+            if len(scores1) > 0 and len(scores2) > 0:
+                # Call ranksums ONCE per pair
+                stat, pval = ranksums(scores1, scores2)
+            else:
+                stat, pval = np.nan, np.nan
+
+            records.append(
+                {
+                    "wilcoxStat": stat,
+                    "wilcoxPval": pval,
+                    "cellCat": cell_cat,
+                    "LRcat": lr_cat,
+                }
+            )
+
+    # 4. Construct final DataFrame at once
+    return pd.DataFrame(records)
+
+# %%
 
 def plotDiffCcommStatsHM(diffCommTable, min_pval, vmin=None, vmax=None):
     """Plot heatmap of differential cell communication statistics
@@ -219,7 +365,7 @@ def plotDiffCcommStatsHM(diffCommTable, min_pval, vmin=None, vmax=None):
     return x_hm, plot
 
 #%%
-def getDiffComm(diffCommTbl, pairCatDF, ncells, cat):
+def getDiffComm_old(diffCommTbl, pairCatDF, ncells, cat):
     """get the differential communication scores for a specific LR category
     
     Parameters
@@ -254,6 +400,46 @@ def getDiffComm(diffCommTbl, pairCatDF, ncells, cat):
     return x_chem
 
 #%%
+
+def getDiffComm(diffCommTbl, pairCatDF, ncells, cat):
+    """get the differential communication scores for a specific LR category
+    
+    Parameters
+    ----------
+    diffCommTbl : pd.DataFrame
+        differential communication scores dataframe of cell pairs (or groupings) x LR categories
+        (obtained with plotDiffCcommStatsHM function)
+    pairCatDF : pd.DataFrame
+    ncells : int
+        number of cells or groups
+    cat : str 
+        LR category to be tested
+    Returns
+    -------
+    x_chem : pd.DataFrame
+        cells x cells or groups x groups dataframe of differential communication scores for a specific LR category
+    """
+
+    # 1. Extract the specific category series from diffCommTbl
+    cat_scores = (
+        diffCommTbl.loc[cat] if cat in diffCommTbl.index else diffCommTbl[cat]
+    )
+
+    # 2. Map scores directly to cell_pairs using vector mapping
+    scores = pairCatDF["cell_pairs"].map(cat_scores).fillna(0.0).values
+
+    # 3. Reshape into (ncells x ncells) matrix
+    x_chem = pd.DataFrame(scores.reshape(-1, ncells))
+
+    # 4. Extract unique cell type names in PRESERVED appearance order using pd.unique
+    cell_names = pd.unique(pairCatDF["cell_pairs"].str.split("->").str[0])
+
+    # 5. Assign row and column labels
+    x_chem.columns = cell_names
+    x_chem.index = cell_names
+
+    return x_chem
+# %%
 
 def catNW(x_chem,colocNW, cell_group, group=None, group_cmap='tab20', ncols=20, color_group=None, plot_title='', 
           clist=None, nodeSize=None, legend_ax=[0.7, 0.05, 0.15, 0.2], layout='neato', thr=0, fsize=(8,8), alpha=1, lab_spacing=7, edge_scale=1, pos=None):    

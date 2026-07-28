@@ -235,7 +235,7 @@ def compute_sc_spatial_radius_coloc_matrix(adata, cluster_col, radius=40.0):
     return pd.DataFrame(mat, index=categories, columns=categories)
 
 # %%
-def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   
+def reshapeColoc_old(CTcoloc, oneCTinteractions='', complete=1):   
     """Transforms matrix obtained with getColocProbs into a matrix of CT pairs x samples
     CTcoloc=previously obtained colocalisation matrix from getColocprobs
     complete=list with repeated values (ct1_x_ct2 and ct2_x_ct1)
@@ -279,6 +279,67 @@ def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):
     
     return colocPerSample1
 
+# %%
+def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   
+    """Transforms matrix obtained with getColocProbs into a matrix of CT pairs x samples
+    CTcoloc=previously obtained colocalisation matrix from getColocprobs
+    complete=list with repeated values (ct1_x_ct2 and ct2_x_ct1)
+    
+    Parameters
+    ----------
+    CTcoloc : pd.DataFrame
+        Concatenated dataframes of cell type pairs co-localization probabilities per sample (obtained via getColocProbs())
+    oneCTinteractions : list
+        list of single cell interactions (celltype-celltype)
+    complete : flag (default: 1)
+        indicates if the co-localization matrices are complete (1) (not just half) , with repeated values at ct1_x_ct2 and ct2_x_ct1
+        or half matrices are used as input (0)
+    
+    Returns
+    -------
+    colocPerSample1 : pd.DataFrame
+        Probabilities of each cell type pair per sample
+    """
+
+    # 1. Identify cell type columns (all columns except 'sample')
+    ct_cols = [c for c in CTcoloc.columns if c != "sample"]
+
+    # 2. Extract cell-type 1 from index and reset to a standard column
+    df = CTcoloc.reset_index().rename(columns={"index": "ct1"})
+
+    # 3. Reshape from wide to long: [sample, ct1, ct2, prob]
+    df_long = df.melt(
+        id_vars=["sample", "ct1"],
+        value_vars=ct_cols,
+        var_name="ct2",
+        value_name="prob",
+    )
+
+    # 4. Filter upper triangle if complete == 0 to avoid duplicates (ct1 <= ct2)
+    if complete == 0:
+        # Get categorical index mapping to quickly filter lower triangle
+        ct_map = {ct: i for i, ct in enumerate(ct_cols)}
+        mask = df_long["ct1"].map(ct_map) <= df_long["ct2"].map(ct_map)
+        df_long = df_long[mask]
+
+    # 5. Create the combined pair column 'ct1-ct2'
+    df_long["pair"] = df_long["ct1"] + "-" + df_long["ct2"]
+
+    # 6. Pivot to get CT pairs as columns and samples as index
+    colocPerSample1 = df_long.pivot(
+        index="sample", columns="pair", values="prob"
+    )
+
+    # Clean up index/column names to match original output shape
+    colocPerSample1.index.name = None
+    colocPerSample1.columns.name = None
+
+    # 7. Apply scaling factor (*2) for non-single CT interactions when complete == 0
+    if complete == 0 and oneCTinteractions:
+        diff_cols = np.setdiff1d(colocPerSample1.columns, oneCTinteractions)
+        colocPerSample1[diff_cols] *= 2
+
+    return colocPerSample1
 
 # %%
 def diffColoc_test(coloc_pair_sample, sampleTypes, exp_condition, ctrl_condition):
