@@ -301,13 +301,13 @@ def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):
         Probabilities of each cell type pair per sample
     """
 
-    # 1. Identify cell type columns (all columns except 'sample')
+    # 1. Identify cell type columns while excluding 'sample'
     ct_cols = [c for c in CTcoloc.columns if c != "sample"]
+    ct_rows = CTcoloc.index.unique().tolist()
 
-    # 2. Extract cell-type 1 from index and reset to a standard column
+    # 2. Extract cell-type 1 from index and prepare long format
     df = CTcoloc.reset_index().rename(columns={"index": "ct1"})
 
-    # 3. Reshape from wide to long: [sample, ct1, ct2, prob]
     df_long = df.melt(
         id_vars=["sample", "ct1"],
         value_vars=ct_cols,
@@ -315,29 +315,41 @@ def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):
         value_name="prob",
     )
 
-    # 4. Filter upper triangle if complete == 0 to avoid duplicates (ct1 <= ct2)
-    if complete == 0:
-        # Get categorical index mapping to quickly filter lower triangle
-        ct_map = {ct: i for i, ct in enumerate(ct_cols)}
-        mask = df_long["ct1"].map(ct_map) <= df_long["ct2"].map(ct_map)
-        df_long = df_long[mask]
-
-    # 5. Create the combined pair column 'ct1-ct2'
+    # 3. Create 'ct1-ct2' interaction pair string
     df_long["pair"] = df_long["ct1"] + "-" + df_long["ct2"]
 
-    # 6. Pivot to get CT pairs as columns and samples as index
+    # 4. Generate EXACT column order as original nested loops
+    ordered_pairs = []
+    if complete == 0:
+        # Original loop: for ct in columns ... for ct2 in columns[i:]
+        for i, ct in enumerate(ct_cols):
+            for ct2 in ct_cols[i:]:
+                ordered_pairs.append(f"{ct}-{ct2}")
+        # Filter df_long to only include these upper triangle pairs
+        df_long = df_long[df_long["pair"].isin(set(ordered_pairs))]
+    else:
+        # Original loop: for ct in columns ... for ct2 in columns
+        for ct in ct_cols:
+            for ct2 in ct_cols:
+                ordered_pairs.append(f"{ct}-{ct2}")
+
+    # 5. Pivot and reindex columns to guarantee original exact column ordering
     colocPerSample1 = df_long.pivot(
         index="sample", columns="pair", values="prob"
     )
 
-    # Clean up index/column names to match original output shape
+    # Re-order columns to match original nested loop sequence
+    existing_pairs = [p for p in ordered_pairs if p in colocPerSample1.columns]
+    colocPerSample1 = colocPerSample1[existing_pairs]
+
+    # Clean up index metadata
     colocPerSample1.index.name = None
     colocPerSample1.columns.name = None
 
-    # 7. Apply scaling factor (*2) for non-single CT interactions when complete == 0
+    # 6. Apply *2 multiplier for complete == 0 on non-single CT interactions
     if complete == 0 and oneCTinteractions:
         diff_cols = np.setdiff1d(colocPerSample1.columns, oneCTinteractions)
-        colocPerSample1[diff_cols] *= 2
+        colocPerSample1[diff_cols] = colocPerSample1[diff_cols] * 2
 
     return colocPerSample1
 
