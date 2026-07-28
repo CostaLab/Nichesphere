@@ -8,6 +8,7 @@ import matplotlib.colors as mcolors
 import networkx as nx
 import sklearn
 from matplotlib.colors import ListedColormap
+from scipy.stats import ranksums
 
 def unique(array):
     """get unique elements in array without re-sorting
@@ -145,54 +146,80 @@ def lr_ctPairScores_perCat_dir(ccommTable, db, dbCatCol, dbMatchCol, ccommMatchC
         cell communication table with new columns 'cell_pairs', 'niche_pairs', 'LRcat' and 'condition'
     """
 
-    # 1. Clean up db match keys
-    db_clean = db[[dbCatCol, dbMatchCol]].drop_duplicates().copy()
-    db_clean[dbMatchCol] = db_clean[dbMatchCol].astype(str).str.lower()
+    # 1. Prepare pairCatDF lookup indexed by cell_pairs
+    pairCat_indexed = pairCatDF.set_index("cell_pairs", drop=False)
 
     # 2. Filter ccommTable against oneCTinteractions
     ccomm_filtered = ccommTable[
         ~ccommTable["cellpair"].isin(oneCTinteractions)
     ].copy()
+
+    if ccomm_filtered.empty:
+        return pd.DataFrame()
+
     ccomm_filtered["match_key"] = (
         ccomm_filtered[ccommMatchCol].astype(str).str.lower()
     )
 
-    # 3. Merge ccommTable with db to associate categories with interactions
-    merged = ccomm_filtered.merge(
-        db_clean, left_on="match_key", right_on=dbMatchCol, how="inner"
-    )
+    # Clean db match keys
+    db_clean = db[[dbCatCol, dbMatchCol]].drop_duplicates().copy()
+    db_clean[dbMatchCol] = db_clean[dbMatchCol].astype(str).str.lower()
 
-    if merged.empty:
-        return pd.DataFrame()
+    # 3. Preserve EXACT category iteration order from original function
+    unique_cats = db[dbCatCol].unique()
 
-    # 4. Perform vector sum across BOTH Category and 'allpair' simultaneously
-    # This replaces calling calculate_LR_CT_pair_scores_dir in a loop!
-    grouped_scores = (
-        merged.groupby([dbCatCol, "allpair"])[ccommLRscoresCol]
-        .sum()
-        .reset_index()
-    )
+    category_dfs = []
 
-    # 5. Extract cellpair (ct1->ct2) using vectorized string methods
-    split_idx = grouped_scores["allpair"].str.split("/")
-    ct1 = split_idx.str[0]
-    ct2 = split_idx.str[1].str.split("@").str[1]
-    grouped_scores["cellpair"] = ct1 + "->" + ct2
+    # Iterate through unique categories in original sequence
+    for cat in unique_cats:
+        # Get matching elements for this category
+        cat_matches = db_clean.loc[
+            db_clean[dbCatCol] == cat, dbMatchCol
+        ].tolist()
+        sub_ccomm = ccomm_filtered[
+            ccomm_filtered["match_key"].isin(cat_matches)
+        ]
 
-    # 6. Map pairCatDF annotations directly using indexed lookup/merge
-    pairCat_indexed = pairCatDF.set_index("cell_pairs")
-    matched_cats = pairCat_indexed.loc[grouped_scores["cellpair"]].reset_index(
-        drop=True
-    )
+        if sub_ccomm.empty:
+            continue
 
-    # 7. Construct final result dataframe
-    result = matched_cats.copy()
-    result.index = grouped_scores["allpair"]
-    result["LRscores"] = grouped_scores[ccommLRscoresCol].values
-    result["LRcat"] = grouped_scores[dbCatCol].values
-    result["condition"] = condition
+        # Compute LR scores (returns pandas Series/DataFrame indexed by allpair)
+        ccommScores_plt = pd.DataFrame(
+            calculate_LR_CT_pair_scores_dir(
+                ccommTable=sub_ccomm, LRscoresCol=ccommLRscoresCol
+            )
+        )
 
-    return result
+        if ccommScores_plt.empty:
+            continue
+
+        # Extract cellpair format (ct1->ct2) exactly as in original code
+        split_idx = ccommScores_plt.index.str.split("/")
+        ct1 = split_idx.str[0]
+        ct2 = split_idx.str[1].str.split("@").str[1]
+        ccommScores_plt["cellpair"] = ct1 + "->" + ct2
+
+        # Look up corresponding rows from pairCatDF
+        boxplotDF = pairCat_indexed.loc[ccommScores_plt["cellpair"]].copy()
+
+        # Re-assign index to match ccommScores_plt.index (allpair index)
+        boxplotDF.index = ccommScores_plt.index
+
+        # Add remaining columns in exact order of original code
+        boxplotDF["LRscores"] = ccommScores_plt[ccommLRscoresCol]
+        boxplotDF["LRcat"] = cat
+
+        category_dfs.append(boxplotDF)
+
+    # 4. Concatenate and attach condition column at the end
+    if category_dfs:
+        CTpairScores_byCat = pd.concat(category_dfs)
+    else:
+        CTpairScores_byCat = pd.DataFrame()
+
+    CTpairScores_byCat["condition"] = condition
+
+    return CTpairScores_byCat
 # %%
 
 def equalizeScoresTables(ctrlTbl, expTbl, ctrlCondition, expCondition):
