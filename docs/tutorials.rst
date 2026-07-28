@@ -1,20 +1,22 @@
 Tutorials
 =========
 
-In our first example we will use data from the Myocardial Infarction atlas from Kuppe, C. et. Al., 2022 to find differential co-localization domains related to ischemia. The data you'll need to run the tutorials can be found here: https://doi.org/10.5281/zenodo.15790389  
+The following tutorials use data from the Myocardial Infarction (MI) atlas (Kuppe et al., 2022) to demonstrate how NicheSphere identifies differential co-localization niches and associated biological processes related to ischemia.
+
+Data required to run the tutorials can be downloaded from Zenodo: https://doi.org/10.5281/zenodo.15790389
 
 .. nbgallery::
-    :caption: Notebooks:
-    :glob:
+    :caption: MI Visium tutorials:
 
-    notebooks/Nichesphere_tutorial_MIvisium_coloc.ipynb
-    notebooks/Nichesphere_tutorial_MIvisium_comm.ipynb
-    notebooks/Nichesphere_tutorial_MIvisium_preprocessing.ipynb
+    notebooks/Nichesphere_tutorial_MIvisium.ipynb
+    notebooks/Nichesphere_tutorial_MIvisium_PILOT.ipynb
 
-NicheSphere results can be used for condition to condition trajectory inference with PILOT https://github.com/CostaLab/PILOT . 
-
-.. nbgallery::
-    :caption: Notebooks:
-    :glob:
-
-    notebooks/Nichesphere-PILOT_integration_tutorial.ipynb
+.. Uncomment the section below when the PIC-seq preprint is updated:
+..
+.. The following tutorial applies NicheSphere to bone marrow fibrosis PIC-seq data.
+.. Data required to run this tutorial can be downloaded from Zenodo: https://doi.org/XXXXXXX
+..
+.. .. nbgallery::
+..     :caption: PIC-seq tutorial:
+..
+..     notebooks/Nichesphere_tutorial_PIC.ipynb

@@ -7,3 +7,5 @@ API Reference
    coloc
    comm
    tl
+   niche_stats
+   sankey
