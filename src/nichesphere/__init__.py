@@ -7,4 +7,5 @@ from . import coloc
 from . import comm
 from . import niche_stats
 from . import sankey_plot
+from . import database
 #from . import pl
