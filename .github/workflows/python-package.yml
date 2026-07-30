@@ -3,9 +3,9 @@ name: Python package
 
 on:
   push:
-    branches: [ "main", "doc" ] # Added "doc" so you can see if it works before merging!
+    branches: [ "main", "dev", "doc" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 jobs:
   build:
@@ -13,23 +13,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10","3.11","3.12"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5 # Updated to v5 (current best practice)
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
-        # IMPORTANT: This installs YOUR local code from the current branch
-        pip install -e . 
-        # Check if requirements exist in the new root or docs folder
+        pip install -e .
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Lint with flake8
@@ -39,5 +37,4 @@ jobs:
 
     - name: Test with pytest
       run: |
-        # This tells pytest to look in your new root tests/ folder
         pytest tests/

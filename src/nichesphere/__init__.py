@@ -8,4 +8,6 @@ from . import comm
 from . import niche_stats
 from . import sankey_plot
 from . import database
+
+from .database import load_DB
 #from . import pl
