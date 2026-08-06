@@ -72,8 +72,23 @@ def getColocProbs_old(CTprobs, spotSamples):
 
 # %%
 
-def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series) -> pd.DataFrame:
-    """Vectorized calculation of cell type co-localization probabilities per sample."""
+def getColocProbs_vec(CTprobs: pd.DataFrame, spotSamples: pd.Series) -> pd.DataFrame:
+    """Vectorized calculation of cell type pair co-localization probabilities per sample
+    (sum across spots of probabilities of each cell type pair being in the same spot)
+
+    Parameters
+    ----------
+    CTprobs : pd.DataFrame
+        Dataframe of cell type probabilities per spot
+    spotSamples : pd.Series
+        Series indicating the sample to which each spot belongs, with spot ids as index.
+
+    Returns
+    -------
+    CTcolocalizationP : pd.DataFrame
+        concatenated dataframes of cell type pairs co-localization probabilities per sample
+    
+    """
     results = []
 
     # Group CTprobs by spotSamples directly (avoids repeated index filtering)
@@ -93,6 +108,48 @@ def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series) -> pd.DataFrame
     return pd.concat(results, axis=0) if results else pd.DataFrame()
 
 # %%
+
+def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series, spotweights: pd.Series = None) -> pd.DataFrame:
+    """Vectorized calculation of cell type pair co-localization probabilities per sample
+    (sum across spots of probabilities of each cell type pair being in the same spot)
+    Parameters
+    ----------
+    CTprobs : pd.DataFrame
+        Dataframe of cell type probabilities per spot
+    spotSamples : pd.Series
+        Series indicating the sample to which each spot belongs, with spot ids as index.
+    spotweights : pd.Series (default: None)
+        Series of weights per spot with spot ids as index.
+
+    Returns
+    -------
+    CTcolocalizationP : pd.DataFrame
+        concatenated dataframes of cell type pairs co-localization probabilities per sample
+    """
+    results = []
+    for smple, group in CTprobs.groupby(spotSamples):
+        n_spots = len(group)
+        if n_spots == 0:
+            continue
+
+        if spotweights is None:
+            # Matrix multiplication: (CellTypes x Spots) @ (Spots x CellTypes) / n_spots
+            coloc_mat = (group.T.values @ group.values) / n_spots
+        else:
+            # align weights to this group's spots, same order
+            w = spotweights.loc[group.index].values
+            w_sum = w.sum()
+            # weight the rows once, then matmul: sum_i w_i * ct_i * col_i
+            coloc_mat = (group.T.values @ (group.values * w[:, None])) / w_sum
+
+        df_smple = pd.DataFrame(coloc_mat, index=group.columns, columns=group.columns)
+        df_smple["sample"] = smple
+        results.append(df_smple)
+
+    return pd.concat(results, axis=0) if results else pd.DataFrame()
+
+# %%
+
 def compute_sc_spatial_knn_coloc_matrix(adata, cluster_col, k=5):
 
     """
