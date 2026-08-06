@@ -32,81 +32,6 @@ def cellCatContained(pair, cellCat):
     contained=[cellType in pair for cellType in cellCat]
     return True in contained
 
-#%%
-
-def getColocProbs_old(CTprobs, spotSamples):
-
-    """Get co-localization probabilities 
-    (sum across spots of probabilities of each cell type pair being in the same spot)
-
-    Parameters
-    ----------
-    CTprobs : pd.DataFrame
-        Dataframe of cell type probabilities per spot
-    spotSamples : pd.Series
-        Series indicating the sample to which each spot belongs, with spot ids as index.
-
-    Returns
-    -------
-    CTcolocalizationP : pd.DataFrame
-        concatenated dataframes of cell type pairs co-localization probabilities per sample
-    """
-
-    CTcolocalizationP=pd.DataFrame()
-    
-    for smple in spotSamples.unique():
-    
-        test=CTprobs.loc[spotSamples.index[spotSamples==smple]]
-        CTcoloc_P = pd.DataFrame()
-        i=0
-        for ct in test.columns:
-            w=pd.DataFrame([test[ct]*test[col]/len(test.index) for col in test.columns], index=test.columns).sum(axis=1)
-            CTcoloc_P = pd.concat([CTcoloc_P, w], axis=1)
-            i=i+1
-        
-        CTcoloc_P.columns=test.columns
-        CTcoloc_P["sample"]=smple
-        CTcolocalizationP = pd.concat([CTcolocalizationP, CTcoloc_P])
-    
-    return CTcolocalizationP
-
-# %%
-
-def getColocProbs_vec(CTprobs: pd.DataFrame, spotSamples: pd.Series) -> pd.DataFrame:
-    """Vectorized calculation of cell type pair co-localization probabilities per sample
-    (sum across spots of probabilities of each cell type pair being in the same spot)
-
-    Parameters
-    ----------
-    CTprobs : pd.DataFrame
-        Dataframe of cell type probabilities per spot
-    spotSamples : pd.Series
-        Series indicating the sample to which each spot belongs, with spot ids as index.
-
-    Returns
-    -------
-    CTcolocalizationP : pd.DataFrame
-        concatenated dataframes of cell type pairs co-localization probabilities per sample
-    
-    """
-    results = []
-
-    # Group CTprobs by spotSamples directly (avoids repeated index filtering)
-    for smple, group in CTprobs.groupby(spotSamples):
-        n_spots = len(group)
-        if n_spots == 0:
-            continue
-        
-        # Matrix multiplication: (CellTypes x Spots) @ (Spots x CellTypes)
-        coloc_mat = (group.T.values @ group.values) / n_spots
-        
-        # Build panel dataframe for this sample
-        df_smple = pd.DataFrame(coloc_mat, index=group.columns, columns=group.columns)
-        df_smple["sample"] = smple
-        results.append(df_smple)
-
-    return pd.concat(results, axis=0) if results else pd.DataFrame()
-
 # %%
 
 def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series, spotweights: pd.Series = None) -> pd.DataFrame:
@@ -291,50 +216,6 @@ def compute_sc_spatial_radius_coloc_matrix(adata, cluster_col, radius=40.0):
 
     return pd.DataFrame(mat, index=categories, columns=categories)
 
-# %%
-def reshapeColoc_old(CTcoloc, oneCTinteractions='', complete=1):   
-    """Transforms matrix obtained with getColocProbs into a matrix of CT pairs x samples
-    CTcoloc=previously obtained colocalisation matrix from getColocprobs
-    complete=list with repeated values (ct1_x_ct2 and ct2_x_ct1)
-    
-    Parameters
-    ----------
-    CTcoloc : pd.DataFrame
-        Concatenated dataframes of cell type pairs co-localization probabilities per sample (obtained via getColocProbs())
-    oneCTinteractions : list
-        list of single cell interactions (celltype-celltype)
-    complete : flag (default: 1)
-        indicates if the co-localization matrices are complete (1) (not just half) , with repeated values at ct1_x_ct2 and ct2_x_ct1
-        or half matrices are used as input (0)
-    
-    Returns
-    -------
-    colocPerSample1 : pd.DataFrame
-        Probabilities of each cell type pair per sample
-    """
-    colocPerSample1=pd.DataFrame()
-    if(complete==0):
-        i=0
-        for ct in CTcoloc.columns[range(len(CTcoloc.columns)-1)]:
-            x=CTcoloc.iloc[CTcoloc.index==ct,range(len(CTcoloc.columns)-1)]
-            for ct2 in CTcoloc.columns[range(i,len(CTcoloc.columns)-1)]:
-                probs=pd.DataFrame(x.iloc[:,x.columns==ct2])
-                probs.index=CTcoloc["sample"].unique()
-                probs.columns=[ct + '-' + ct2]
-                colocPerSample1=pd.concat([colocPerSample1, probs], axis=1)
-            i=i+1
-
-        colocPerSample1[np.setdiff1d(colocPerSample1.columns, oneCTinteractions)]=colocPerSample1[np.setdiff1d(colocPerSample1.columns, oneCTinteractions)]*2
-    else:
-        for ct in CTcoloc.columns[range(len(CTcoloc.columns)-1)]:
-            x=CTcoloc.iloc[CTcoloc.index==ct,range(len(CTcoloc.columns)-1)]
-            for ct2 in CTcoloc.columns[range(len(CTcoloc.columns)-1)]:
-                probs=pd.DataFrame(x.iloc[:,x.columns==ct2])
-                probs.index=CTcoloc["sample"].unique()
-                probs.columns=[ct + '-' + ct2]
-                colocPerSample1=pd.concat([colocPerSample1, probs], axis=1)
-    
-    return colocPerSample1
 
 # %%
 def reshapeColoc(CTcoloc, oneCTinteractions='', complete=1):   
@@ -676,7 +557,7 @@ def OvsE_coloc_test_adjPval(observedColocProbs, expectedColocProbs, testDistribu
     return OvsE_HMdf, statsDF
 #%%
 
-def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, clist=None, 
+def colocNW_old(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, clist=None, 
             nodeSize=None, legend_ax=[0.7, 0.05, 0.15, 0.2], layout='neato', lab_spacing=9, thr=0, alpha=1, fsize=(8,8), pos=None, 
             edge_scale=1):
     """ (Differential) co-localization network
@@ -876,4 +757,213 @@ def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, cl
     gCol.remove_edges_from(to_remove)
     
     return gCol
-#%%
+
+# %%
+
+def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, clist=None, 
+            nodeSize=None, legend_ax=[0.7, 0.05, 0.15, 0.2], layout='neato', lab_spacing=9, thr=0, alpha=1, fsize=(8,8), pos=None, 
+            edge_scale=1):
+    """ (Differential) co-localization network
+
+    Parameters
+    ----------
+    xdiff : pd.DataFrame
+        cell types x cell types data frame of significant 
+        scores for each cell cell interaction
+    adj : pd.DataFrame
+        cell types x cell types adjacency matrix (calculated from the cell cell 
+        interaction scores)
+    cell_group : dict
+        dictionary with niche names as keys and lists of their corresponding cell types as values 
+    group : list (default: None)
+        list of nodes whose interaction will be highlighted
+    group_cmap : str (default: 'tab20')
+        name of the color map from which the niche colors will be taken
+    ncols : int (default: 20)
+        number of colors for the group_cmap
+    clist : list (default: None)
+        alternatively , one can input a list of niche colors
+    nodeSize : str (default: None)
+        value that will define the size of the nodes. Options are 'betweeness', 
+        'pagerank' (network statistics)
+    legend_ax : list (default: [0.7, 0.05, 0.15, 0.2])
+        legend position in the form [x0, y0, width, height]
+    layout : str (default: 'neato')
+        name of the layout to be used. Options are 'neato', 'dot', 'kamada_kawai', 
+        'spring', 'spectral', 'circular', 'force_atlas2', 'fruchterman_reingold' and 'random')
+    lab_spacing : int (default: 9)
+        spacing between labels and nodes
+    thr : float (default: 0)
+        edge weights absolute value must be above this value for the edge to be shown
+    alpha : float (default: 1)
+        edge transparency (from 0 to 1)
+    fsize : tuple
+        figure size in the form (x,y)
+    pos : dict
+        dictionary containing the calculated 2D positions (x, y coordinates) for every node
+    edge_scale : float
+        factor to scale the edge width
+
+    Returns
+    -------
+    gCol : nx.Graph
+        Graph object with cell cell interaction scores as weights
+    Network plot
+    """
+    
+    ## Make color maps
+    cmap = plt.cm.RdBu
+    cmap3 = cmap(np.arange(cmap.N))
+    cmap3[:,-1] = np.linspace(0, alpha, cmap.N)
+    c1=cmap3.copy()
+    cmap3 = ListedColormap(cmap3)
+    
+    cmap = plt.cm.RdBu_r
+    cmap4 = cmap(np.arange(cmap.N))
+    cmap4[:,-1] = np.linspace(0, alpha, cmap.N)
+    c2=cmap4.copy()
+    cmap4 = ListedColormap(cmap4)
+
+    colors = np.vstack((np.flip(c1[128:256], axis=0), c2[128:256]))
+    mymap = mcolors.LinearSegmentedColormap.from_list('my_colormap', colors)
+
+    cmap=mcolors.LinearSegmentedColormap.from_list("WhiteGray",['white','lightgrey'])
+    graycmp = cmap(np.arange(cmap.N))
+    graycmp[:,-1] = np.linspace(0, alpha-0.2, cmap.N)
+    c3=graycmp.copy()
+    graycmp = ListedColormap(graycmp)
+    
+    #cell groups cmap
+    cmap = plt.colormaps[group_cmap].resampled(ncols)
+    if clist == None:
+        cgroup_cmap=[mcolors.rgb2hex(cmap(i)[:3]) for i in range(cmap.N)]
+    else:
+        cgroup_cmap=clist
+    
+    gCol=nx.from_pandas_adjacency(adj, create_using=nx.Graph)
+
+    ## Edge thickness
+    for x in list(gCol.edges):
+        gCol[x[0]][x[1]]['weight'] = np.abs(x_diff.loc[x[0], x[1]])
+    
+    ## FIX: Map node colors based on exact dictionary key order matching G.nodes()
+    niche_keys = list(cell_group.keys())
+    niche_color_map = {niche_keys[i]: cgroup_cmap[i] for i in range(len(niche_keys))}
+    
+    node_to_color = {}
+    for niche_id, members in cell_group.items():
+        assigned_color = niche_color_map[niche_id]
+        for node in members:
+            node_to_color[node] = assigned_color
+            
+    color_group = pd.Series([node_to_color.get(node, '#cccccc') for node in list(gCol.nodes)], index=list(gCol.nodes))
+
+    ### different layouts
+    if layout=='neato':
+        pos = nx.drawing.nx_agraph.graphviz_layout(gCol,prog='neato')
+    if layout=='dot':
+        pos = nx.drawing.nx_agraph.graphviz_layout(gCol,prog='dot')
+    if layout=='kamada_kawai':
+        pos = nx.drawing.kamada_kawai_layout(gCol)
+    if layout=='spring':
+        pos = nx.drawing.spring_layout(gCol)
+    if layout=='spectral':
+        pos = nx.drawing.spectral_layout(gCol)
+    if layout=='circular':
+        pos = nx.drawing.circular_layout(gCol)
+    if layout=='force_atlas2':
+        pos = nx.drawing.forceatlas2_layout(gCol)
+    if layout=='fruchterman_reingold':
+        pos = nx.drawing.fruchterman_reingold_layout(gCol)
+    if layout=='random':
+        pos = nx.drawing.random_layout(gCol)
+
+    if pos!=None:
+        pos=pos
+
+    ## Label positions
+    pos_attrs = {}
+    for node, coords in pos.items():
+        pos_attrs[node] = (coords[0], coords[1]+lab_spacing)
+    
+    to_remove=[(a,b) for a, b, attrs in gCol.edges(data=True) if np.abs(attrs["weight"]) <=thr]
+    gCol.remove_edges_from(to_remove)
+
+    ## Edge colors based on diff coloc
+    edgeCols=pd.Series(['lightblue' if x_diff.loc[x[0], x[1]]<0 else 'orange' for x in list(gCol.edges)])
+    edgeCols.index=[x[0]+'->'+x[1] for x in list(gCol.edges)]
+    
+    orange_edges = [(u,v) for u,v in gCol.edges if edgeCols[u+'->'+v] == 'orange']
+    blue_edges = [(u,v) for u,v in gCol.edges if edgeCols[u+'->'+v] == 'lightblue']
+
+    #normalised scores
+    weights = nx.get_edge_attributes(gCol,'weight').values()
+    inter=pd.Series(np.abs(pd.Series(list(weights))))
+    inter.index=edgeCols.index
+
+    #classify edges by color
+    if group!=None:
+        edgeCols[[cellCatContained(pair=[x.split('->')[0], x.split('->')[0]], 
+                   cellCat=group)==False for x in edgeCols.index]]='lightgray'
+        orange_edges = [(u,v) for u,v in gCol.edges if edgeCols[u+'->'+v] == 'orange']
+        blue_edges = [(u,v) for u,v in gCol.edges if edgeCols[u+'->'+v] == 'lightblue']
+        gray_edges = [(u,v) for u,v in gCol.edges if edgeCols[u+'->'+v] == 'lightgray']
+    
+    # network plot
+    f,ax1 = plt.subplots(1,1,figsize=fsize,dpi=100) 
+    #nodes
+    if nodeSize == 'betweeness':
+        npg = nx.betweenness_centrality(gCol)
+        npg=list(npg.values())
+        
+        nx.draw_networkx_nodes(gCol,pos,node_size=50+1000*((npg)/(np.max(npg))),
+            node_color=color_group,ax=ax1)
+
+    if nodeSize == 'pagerank':
+        npg = nx.pagerank(gCol,max_iter=1000, weight=None)
+        npg=list(npg.values())  
+        
+        nx.draw_networkx_nodes(gCol,pos,node_size=50+1000*((npg)/(np.max(npg))),
+            node_color=color_group,ax=ax1)
+
+    if nodeSize == None:
+        nx.draw_networkx_nodes(gCol,pos,node_color=color_group,ax=ax1)
+    
+    #edges
+    if group!=None:
+        nx.draw_networkx_edges(gCol,pos=pos,edge_color=inter[edgeCols=='lightgray'],
+            connectionstyle="arc3,rad=0.15", arrowstyle='<->',
+            width=inter[edgeCols=='lightgray']*edge_scale,ax=ax1, edgelist=gray_edges, edge_cmap=graycmp, edge_vmin=-1*np.max(inter), edge_vmax=np.max(inter))
+    
+    nx.draw_networkx_edges(gCol,pos=pos,edge_color=inter[edgeCols=='lightblue'],
+        connectionstyle="arc3,rad=0.15", arrowstyle='<->',
+        width=inter[edgeCols=='lightblue']*edge_scale,ax=ax1, edgelist=blue_edges, edge_cmap=cmap3, edge_vmin=-1*np.max(inter), edge_vmax=np.max(inter))
+    nx.draw_networkx_edges(gCol,pos=pos,edge_color=inter[edgeCols=='orange'],
+        connectionstyle="arc3,rad=0.15", arrowstyle='<->',
+        width=inter[edgeCols=='orange']*edge_scale,ax=ax1, edgelist=orange_edges, edge_cmap=cmap4, edge_vmin=-1*np.max(inter), edge_vmax=np.max(inter))
+    nx.draw_networkx_labels(gCol,pos_attrs, font_size=12, font_weight='bold', clip_on=False,ax=ax1)
+
+    #color bar
+    sm = plt.cm.ScalarMappable(cmap=mymap)
+    sm._A = []
+    sm.set_clim(-1*np.max(inter), np.max(inter))
+
+    cax = ax1.inset_axes(legend_ax)
+    cax.set_xticks([])
+    cax.set_yticks([])
+    
+    cax.axis('off')
+    x=plt.colorbar(sm, ax=cax, fraction=0.2)
+    x.set_label('diffColoc. score', rotation=270, labelpad=15, size=10, weight='normal')
+    x.set_alpha(alpha)
+
+    #assign cell cell interaction scores as edge weights 
+    for x in list(gCol.edges):
+        gCol[x[0]][x[1]]['weight'] = x_diff.loc[x[0], x[1]]
+
+    to_remove=[(a,b) for a, b, attrs in gCol.edges(data=True) if np.abs(attrs["weight"]) <=thr]
+    gCol.remove_edges_from(to_remove)
+    
+    return gCol
+
+# %%

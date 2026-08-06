@@ -12,6 +12,7 @@ from joblib import Parallel, delayed
 import time
 from collections import Counter
 from sklearn.neighbors import NearestNeighbors
+from scipy.sparse import csr_matrix
 
 
 def get_spot_ct_props(spot_cell_props, sc_ct):
@@ -337,7 +338,7 @@ def get_PIC_BG_OEratios_DF(adata, annot_col, target_pairs, nreps=1000, njobs=10,
     return df
 # %%
 
-def get_spatial_radius_BG_OEratios_DF(adata, cluster_col, radius=40.0, n_permutations=1000):
+def get_spatial_radius_BG_OEratios_DF_old(adata, cluster_col, radius=40.0, n_permutations=1000):
     
     """
     Generate a null distribution of co-localization probabilities by label permutation.
@@ -430,6 +431,109 @@ def get_spatial_radius_BG_OEratios_DF(adata, cluster_col, radius=40.0, n_permuta
         null_distributions.append(flat_probs)
 
     # Create the testDistribution_df (rows = permutations, columns = cell type pairs)
+    colnames = [f"{c1}-{c2}" for c1 in categories for c2 in categories]
+    return pd.DataFrame(null_distributions, columns=colnames)
+
+# %%
+
+def get_spatial_radius_BG_OEratios_DF(adata, cluster_col, radius=40.0, n_permutations=1000):
+    """
+    Optimized version of get_spatial_radius_BG_OEratios_DF using sparse matrix multiplication.
+    
+    Generate a null distribution of co-localization probabilities by label permutation.
+
+    The spatial graph is built once and held fixed. Cell type labels are then
+    randomly shuffled ``n_permutations`` times, and the radius-based co-localization
+    matrix is recomputed for each permutation. The resulting distribution can be used
+    to test whether observed co-localization probabilities deviate significantly from
+    what is expected under spatial randomness (see ``nichesphere.coloc.OvsE_coloc_test_adjPval``).
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Spatial AnnData object. Must contain cell centroid coordinates in
+        ``adata.obsm['spatial']`` and a categorical cluster annotation column in
+        ``adata.obs``.
+    cluster_col : str
+        Name of the categorical column in ``adata.obs`` containing cluster labels.
+    radius : float, default 40.0
+        Spatial radius used to define the neighborhood graph. Should match the
+        radius used in ``compute_radius_colocalization_matrix``.
+    n_permutations : int, default 1000
+        Number of label-permutation replicates to generate.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame of shape (n_permutations, n_clusters²) containing the
+        null co-localization probabilities. Columns are named ``'{CT1}-{CT2}'``
+        for all cluster pairs (including same-cluster pairs), following the
+        convention expected by ``nichesphere.coloc.OvsE_coloc_test_adjPval``.
+        Rows correspond to individual permutation replicates.
+
+    Notes
+    -----
+    The spatial adjacency graph is computed once before permutation, so
+    runtime scales with ``n_permutations`` rather than re-fitting the
+    neighbor index each time.
+
+    Examples
+    --------
+    >>> bg_df = nichesphere.tl.get_spatial_radius_BG_OEratios_DF(
+    ...     adata, cluster_col='cell_type', radius=300.0, n_permutations=1000
+    ... )
+    >>> OvsE_df, stats = nichesphere.coloc.OvsE_coloc_test_adjPval(
+    ...     observedColocProbs=coloc.stack(),
+    ...     expectedColocProbs=bg_df.mean(),
+    ...     testDistribution_df=bg_df,
+    ...     ...
+    ... )
+    """
+    coords = adata.obsm['spatial']
+    
+    nbrs = NearestNeighbors(radius=radius, algorithm='kd_tree').fit(coords)
+    adj_list = nbrs.radius_neighbors(coords, return_distance=False)
+
+    n_cells = coords.shape[0]
+    indptr = [0]
+    indices = []
+    for neighbors in adj_list:
+        indices.extend(neighbors)
+        indptr.append(len(indices))
+    
+    data = np.ones(len(indices), dtype=np.float32)
+    A = csr_matrix((data, indices, indptr), shape=(n_cells, n_cells))
+    
+    A.setdiag(0)
+    A.eliminate_zeros()
+
+    cluster_labels = adata.obs[cluster_col].astype('category')
+    categories = cluster_labels.cat.categories
+    n_clusters = len(categories)
+    numeric_labels = cluster_labels.cat.codes.values
+
+    Y = np.zeros((n_cells, n_clusters), dtype=np.float32)
+    Y[np.arange(n_cells), numeric_labels] = 1.0
+    Y_sparse = csr_matrix(Y)
+
+    null_distributions = []
+    print(f"Generating {n_permutations} permutations (Vectorized)...")
+
+    for _ in range(n_permutations):
+        shuffled_labels = np.random.permutation(numeric_labels)
+        
+        Y_shuff = np.zeros((n_cells, n_clusters), dtype=np.float32)
+        Y_shuff[np.arange(n_cells), shuffled_labels] = 1.0
+        Y_shuff_sparse = csr_matrix(Y_shuff)
+
+        mat = (Y_shuff_sparse.T @ A @ Y_shuff_sparse).toarray()
+        
+        mat = (mat + mat.T) / 2.0
+        total_sum = mat.sum()
+        if total_sum > 0:
+            mat = mat / total_sum
+            
+        null_distributions.append(mat.flatten())
     colnames = [f"{c1}-{c2}" for c1 in categories for c2 in categories]
     return pd.DataFrame(null_distributions, columns=colnames)
 
