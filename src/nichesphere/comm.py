@@ -572,11 +572,22 @@ def catNW(x_chem,colocNW, cell_group, group=None, group_cmap='tab20', ncols=20, 
        
     ## Node color groups
     if color_group is None:
-        color_group=pd.Series(list(G.nodes))
-        i=0
-        for k in list(cell_group.keys()):
-            color_group[[cellCatContained(pair=p, cellCat=cell_group[k]) for p in color_group]]=cgroup_cmap[i]
-            i=i+1
+        ## FIX: Map node colors based on exact dictionary key order matching G.nodes()
+        niche_keys = list(cell_group.keys())
+        niche_color_map = {niche_keys[i]: cgroup_cmap[i] for i in range(len(niche_keys))}
+        
+        node_to_color = {}
+        for niche_id, members in cell_group.items():
+            assigned_color = niche_color_map[niche_id]
+            for node in members:
+                node_to_color[node] = assigned_color
+
+        color_group = pd.Series([node_to_color.get(node, '#cccccc') for node in list(G.nodes)], index=list(G.nodes))
+        #color_group=pd.Series(list(G.nodes))
+        #i=0
+        #for k in list(cell_group.keys()):
+        #    color_group[[cellCatContained(pair=p, cellCat=cell_group[k]) for p in color_group]]=cgroup_cmap[i]
+        #    i=i+1
         
     ## Edge thickness
     for x in list(G.edges):
