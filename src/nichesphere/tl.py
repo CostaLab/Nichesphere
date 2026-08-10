@@ -798,8 +798,8 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
         node = g.nodes[node_id]
         node['size_betweeness'] = 10 + node_centralities_bet[node_id] * 100
         node['size_pagerank_uw'] = 10 + node_pr_uw[node_id] * 100
-        node['size_betweeness_signed'] = 1+bw_npg[node_id]
-        node['size_pagerank_signed'] = 1+pr_npg[node_id]
+        node['size_betweeness_signed'] = 2+bw_npg[node_id]
+        node['size_pagerank_signed'] = 2+pr_npg[node_id] * 5
         node['shape'] = 'circle'
         
         for community_counter, community_members in enumerate(communities):
