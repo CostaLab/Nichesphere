@@ -769,13 +769,13 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
 
     bw_pos = nx.betweenness_centrality(G_pos)
     bw_neg = nx.betweenness_centrality(G_neg)
-    bw_npg = [np.log2((1e-10 + bw_pos[n]) / (1e-10 + bw_neg[n])) for n in gCol.nodes]
+    bw_npg = [np.log2((1e-10 + bw_pos[n]) / (1e-10 + bw_neg[n])) for n in g.nodes]
     bw_npg = np.abs(np.array(bw_npg))  # size by magnitude of imbalance
 
 
     pr_pos = nx.pagerank(G_pos)
     pr_neg = nx.pagerank(G_neg)
-    pr_npg = [np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])) for n in gCol.nodes]
+    pr_npg = [np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])) for n in g.nodes]
     pr_npg = np.abs(np.array(pr_npg))  # size by magnitude of imbalance
 
     
