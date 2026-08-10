@@ -750,6 +750,34 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
     # Centrality calculation
     node_centralities_bet = nx.betweenness_centrality(g)
     node_pr_uw = nx.pagerank(g, max_iter=1000, weight=None)
+
+    # Signed stats
+    
+    # Rebuild signed weights on the (already thr-filtered) edge set,
+    # since gCol currently holds abs(x_diff) for edge thickness.
+    G_signed = g.copy()
+
+    G_pos = G_signed.copy()
+    G_pos.remove_edges_from(
+        [(a, b) for a, b, attrs in G_pos.edges(data=True) if attrs['weight'] <= 0]
+    )
+    G_neg = G_signed.copy()
+    G_neg.remove_edges_from(
+        [(a, b) for a, b, attrs in G_neg.edges(data=True) if attrs['weight'] >= 0]
+    )
+
+
+    bw_pos = nx.betweenness_centrality(G_pos)
+    bw_neg = nx.betweenness_centrality(G_neg)
+    bw_npg = [np.log2((1e-10 + bw_pos[n]) / (1e-10 + bw_neg[n])) for n in gCol.nodes]
+    bw_npg = np.abs(np.array(bw_npg))  # size by magnitude of imbalance
+
+
+    pr_pos = nx.pagerank(G_pos)
+    pr_neg = nx.pagerank(G_neg)
+    pr_npg = [np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])) for n in gCol.nodes]
+    pr_npg = np.abs(np.array(pr_npg))  # size by magnitude of imbalance
+
     
 
     # Graph properties
@@ -762,6 +790,8 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
         node = g.nodes[node_id]
         node['size_betweeness'] = 10 + node_centralities_bet[node_id] * 100
         node['size_pagerank_uw'] = 10 + node_pr_uw[node_id] * 100
+        node['size_betweeness_signed'] = 10 + bw_npg[node_id] * 100
+        node['size_pagerank_signed'] = 10 + pr_npg[node_id] * 100
         node['shape'] = 'circle'
         
         for community_counter, community_members in enumerate(communities):
