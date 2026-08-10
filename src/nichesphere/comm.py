@@ -495,7 +495,9 @@ def catNW(x_chem,colocNW, cell_group, group=None, group_cmap='tab20', ncols=20, 
         alternatively , one can input a list of niche colors
     nodeSize : str (default: None)
         value that will define the size of the nodes. Options are 'betweeness', 
-        'pagerank' (network statistics)
+        'pagerank' , 'signed_betweeness', 'signed_pagerank' (network statistics; 
+        the 'signed_*' options size nodes by |log2((pos+eps)/(neg+eps))|, 
+        matching nichesphere.tl.compute_network_stats)
     legend_ax : list (default: [0.7, 0.05, 0.15, 0.2])
         legend position in the form [x0, y0, width, height]
     layout : str (default: 'neato')
@@ -674,6 +676,8 @@ def catNW(x_chem,colocNW, cell_group, group=None, group_cmap='tab20', ncols=20, 
 
     #### signed stats node sizes
     if nodeSize in ('signed_betweeness', 'signed_pagerank'):
+
+        pos_edges=pos
         # Rebuild signed weights on the (already thr-filtered) edge set,
         # since gCol currently holds abs(x_diff) for edge thickness.
         G_signed = G.copy()
