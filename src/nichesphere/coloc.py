@@ -785,7 +785,9 @@ def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, cl
         alternatively , one can input a list of niche colors
     nodeSize : str (default: None)
         value that will define the size of the nodes. Options are 'betweeness', 
-        'pagerank' (network statistics)
+        'pagerank' , 'signed_betweeness', 'signed_pagerank' (network statistics; 
+        the 'signed_*' options size nodes by |log2((pos+eps)/(neg+eps))|, 
+        matching nichesphere.tl.compute_network_stats)
     legend_ax : list (default: [0.7, 0.05, 0.15, 0.2])
         legend position in the form [x0, y0, width, height]
     layout : str (default: 'neato')
@@ -928,7 +930,38 @@ def colocNW(x_diff,adj, cell_group, group=None, group_cmap='tab20', ncols=20, cl
 
     if nodeSize == None:
         nx.draw_networkx_nodes(gCol,pos,node_color=color_group,ax=ax1)
-    
+    #### signed stats node sizes
+    if nodeSize in ('signed_betweeness', 'signed_pagerank'):
+        # Rebuild signed weights on the (already thr-filtered) edge set,
+        # since gCol currently holds abs(x_diff) for edge thickness.
+        G_signed = gCol.copy()
+        for x in list(G_signed.edges):
+            G_signed[x[0]][x[1]]['weight'] = x_diff.loc[x[0], x[1]]
+
+        G_pos = G_signed.copy()
+        G_pos.remove_edges_from(
+            [(a, b) for a, b, attrs in G_pos.edges(data=True) if attrs['weight'] <= 0]
+        )
+        G_neg = G_signed.copy()
+        G_neg.remove_edges_from(
+            [(a, b) for a, b, attrs in G_neg.edges(data=True) if attrs['weight'] >= 0]
+        )
+
+        if nodeSize == 'signed_betweeness':
+            bw_pos = nx.betweenness_centrality(G_pos)
+            bw_neg = nx.betweenness_centrality(G_neg)
+            npg = [np.log2((1e-10 + bw_pos[n]) / (1e-10 + bw_neg[n])) for n in gCol.nodes]
+
+        if nodeSize == 'signed_pagerank':
+            pr_pos = nx.pagerank(G_pos)
+            pr_neg = nx.pagerank(G_neg)
+            npg = [np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])) for n in gCol.nodes]
+
+        npg = np.abs(np.array(npg))  # size by magnitude of imbalance
+
+        nx.draw_networkx_nodes(gCol,pos,node_size=50+1000*((npg)/(np.max(npg))),
+            node_color=color_group,ax=ax1)
+    ####
     #edges
     if group!=None:
         nx.draw_networkx_edges(gCol,pos=pos,edge_color=inter[edgeCols=='lightgray'],

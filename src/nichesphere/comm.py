@@ -672,6 +672,36 @@ def catNW(x_chem,colocNW, cell_group, group=None, group_cmap='tab20', ncols=20, 
         nx.draw_networkx_nodes(G,pos,node_size=50+1000*((npg)/(np.max(npg))),
             node_color=color_group,ax=ax1)
 
+    #### signed stats node sizes
+    if nodeSize in ('signed_betweeness', 'signed_pagerank'):
+        # Rebuild signed weights on the (already thr-filtered) edge set,
+        # since gCol currently holds abs(x_diff) for edge thickness.
+        G_signed = G.copy()
+
+        G_pos = G_signed.copy()
+        G_pos.remove_edges_from(
+            [(a, b) for a, b, attrs in G_pos.edges(data=True) if attrs['weight'] <= 0]
+        )
+        G_neg = G_signed.copy()
+        G_neg.remove_edges_from(
+            [(a, b) for a, b, attrs in G_neg.edges(data=True) if attrs['weight'] >= 0]
+        )
+
+        if nodeSize == 'signed_betweeness':
+            bw_pos = nx.betweenness_centrality(G_pos)
+            bw_neg = nx.betweenness_centrality(G_neg)
+            npg = [np.log2((1e-10 + bw_pos[n]) / (1e-10 + bw_neg[n])) for n in G.nodes]
+
+        if nodeSize == 'signed_pagerank':
+            pr_pos = nx.pagerank(G_pos)
+            pr_neg = nx.pagerank(G_neg)
+            npg = [np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])) for n in G.nodes]
+
+        npg = np.abs(np.array(npg))  # size by magnitude of imbalance
+
+        nx.draw_networkx_nodes(G,pos,node_size=50+1000*((npg)/(np.max(npg))),
+            node_color=color_group,ax=ax1)
+    ####
     if nodeSize == None:
         pos_edges=pos
 
