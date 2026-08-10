@@ -781,7 +781,7 @@ def assign_properties(g, communities, colors, pos=None, node_coord_sf=200, simmi
     pr_neg = nx.pagerank(G_neg)
     #pr_npg = [np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])) for n in g.nodes]
     #pr_npg = np.abs(np.array(pr_npg))  # size by magnitude of imbalance
-    bw_npg = {
+    pr_npg = {
     n: np.abs(np.log2((1e-10 + pr_pos[n]) / (1e-10 + pr_neg[n])))
     for n in g.nodes
     }
