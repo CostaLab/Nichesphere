@@ -8,8 +8,8 @@ Data required to run the tutorials can be downloaded from Zenodo: https://doi.or
 .. nbgallery::
     :caption: MI Visium tutorials:
 
-    notebooks/Nichesphere_tutorial_MIvisium.ipynb
-    notebooks/Nichesphere_tutorial_MIvisium_PILOT.ipynb
+    notebooks/Nichesphere_tutorial_MIvisium
+    notebooks/Nichesphere_tutorial_MIvisium_PILOT
 
 .. Uncomment the section below when the PIC-seq preprint is updated:
 ..

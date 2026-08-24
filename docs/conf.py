@@ -28,15 +28,20 @@ extensions = [
     'sphinx.ext.napoleon', 
     'sphinx_book_theme',
     'nbsphinx', 
-    'sphinx.ext.autosummary', 
+    'sphinx.ext.autosummary',
+    'sphinxcontrib.bibtex', 
     'sphinx.ext.intersphinx',
-    "sphinx_design"]
+    'sphinx_design']
 
 autosummary_generate = True # Auto-generates individual API doc pages from summary tables
 templates_path = ['_templates']
 exclude_patterns = []
 
 language = 'English'
+
+# -- BibTeX citation settings
+bibtex_bibfiles = ['references.bib']
+bibtex_default_style = 'alpha'
 
 # -- It hides the input/output prompt numbers (In [1]: / Out [1]:).
 nbsphinx_prolog = """
