@@ -2,7 +2,7 @@
 .. _api_sankey_plot:
 
 sankey_plot module
-=====================
+--------------------
 
 Biological process specific sankey plots
 

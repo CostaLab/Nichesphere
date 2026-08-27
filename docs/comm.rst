@@ -2,7 +2,7 @@
 .. _api_comm:
 
 comm module
-=======================
+--------------
 
 Focused on differential communication
 

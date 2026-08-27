@@ -2,7 +2,7 @@
 .. _api_coloc:
 
 coloc module
-=======================
+--------------
 
 Focused on differential co-localization
 

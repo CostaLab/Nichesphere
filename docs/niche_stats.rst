@@ -2,7 +2,7 @@
 .. _api_niche_stats:
 
 niche_stats module
-=====================
+-------------------
 
 Tools to test and visualize the internal cohesion of each niche relative to its cross-niche connections
 

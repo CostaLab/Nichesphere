@@ -37,6 +37,7 @@ def cellCatContained(pair, cellCat):
 def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series, spotweights: pd.Series = None) -> pd.DataFrame:
     """Vectorized calculation of cell type pair co-localization probabilities per sample
     (sum across spots of probabilities of each cell type pair being in the same spot)
+    
     Parameters
     ----------
     CTprobs : pd.DataFrame
