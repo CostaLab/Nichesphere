@@ -10,3 +10,7 @@ results/
 .ipynb_checkpoints/
 *.pyc
 Results_PILOT/
+docs/build/
+docs/_build/
+docs/generated/
+nichesphere/

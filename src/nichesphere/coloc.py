@@ -37,6 +37,7 @@ def cellCatContained(pair, cellCat):
 def getColocProbs(CTprobs: pd.DataFrame, spotSamples: pd.Series, spotweights: pd.Series = None) -> pd.DataFrame:
     """Vectorized calculation of cell type pair co-localization probabilities per sample
     (sum across spots of probabilities of each cell type pair being in the same spot)
+    
     Parameters
     ----------
     CTprobs : pd.DataFrame
@@ -458,6 +459,7 @@ def spatialSingleCTPlot(adata, cell_type, CTprobs, spot_size=1, legend_fontsize=
 
 def OvsE_coloc_test(observedColocProbs, expectedColocProbs, cell_types, testDistribution, oneCTinteractions, p=0.05):
     """ Observed vs Expected log2 ratios filtered by p-value obtained from comparing them against a background distribution
+    
     Parameters
     ----------
     observedColocProbs : pd.Series

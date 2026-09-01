@@ -1,0 +1,104 @@
+/* --- Custom sidebar logo size --- */
+
+img[src*="logo.png"] {
+    max-height: 150px !important; /* Limits maximum image height */
+    height: 150px !important; /* Forces a fixed height of 140px */
+    width: auto !important; /* Maintains aspect ratio automatically */
+}
+
+
+
+
+/* --- Logo home page --- */
+
+/* Margin and spacing around the floating logo */
+img.logo-header {
+    background: none !important;
+    margin-left: 30px !important;
+    margin-bottom: 20px !important;
+    margin-top: -10px !important; /* Slightly aligns the top of the logo with the heading */
+}
+
+/* Improves text flow next to the logo */
+p {
+    text-align: justify;
+    line-height: 1.6 !important;
+}
+
+/* Clears floating alignment after the first block to prevent layout issues */
+.clear-float {
+    clear: both;
+}
+
+
+
+
+/* --- Styles for the nbgallery (Thumbnails in tutorial section) --- */
+
+/* Gallery container: uses flexbox to align cards */
+div.nbgallery {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+    margin-top: 20px !important;
+    margin-bottom: 25px !important;
+    align-items: stretch !important; /* IMPORTANT: Ensures all cards in the row have the same height */
+}
+
+/* Individual Card Formatting */
+.nbsphinx-gallery .sphx-glr-thumbcontainer,
+div.nbgallery > div {
+    border: 1px solid #e2e8f0 !important; /* Soft solid gray border */
+    border-style: solid !important;
+    border-radius: 50px !important;       /* Rounded corners */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important; /* Soft shadow */
+    background-color: #ffffff !important;
+    padding: 15px !important;
+    width: 210px !important;              /* Uniform width */
+    display: flex !important;
+    flex-direction: column !important;     /* Column layout: Image top, Text bottom */
+    justify-content: flex-start !important; /* Content starts at the top */
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    height: auto !important;               /* IMPORTANT: Do not force fixed height */
+    box-sizing: border-box !important;
+}
+
+/* Hover effect in tutorial notebooks*/
+.nbsphinx-gallery .sphx-glr-thumbcontainer:hover,
+div.nbgallery > div:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Image inside the card */
+.nbsphinx-gallery .sphx-glr-thumbcontainer img,
+div.nbgallery img {
+    max-height: 120px !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+    display: block !important;
+    border-bottom: 1px solid #f1f5f9 !important; /* Divider line below image */
+    padding-bottom: 10px !important;
+    margin-bottom: 0 !important;               /* REMOVES margin that pushed text down */
+}
+
+/* Notebook Text/Title style */
+.nbsphinx-gallery a,
+div.nbgallery a,
+.nbsphinx-gallery .sphx-glr-thumbcontainer a {
+    color: var(--color-foreground-primary, currentColor) !important; /* Professional dark text color */
+    font-weight: 600 !important;
+    font-size: 0.9em !important;
+    line-height: 1.4 !important;
+    text-decoration: none !important;     /* Removes blue underline */
+    text-align: center !important;
+    margin-top: 10px !important;         /* Space between divider line and text */
+    display: block !important;
+    width: 100% !important;
+}
+
+.nbsphinx-gallery a:hover,
+div.nbgallery a:hover {
+    color: var(--color-brand-primary, #2563eb) !important;
+}
