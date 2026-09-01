@@ -1,7 +1,8 @@
 # New layout tools 
 sphinxcontrib-bibtex
 sphinx-design
-
+pygments
+ipython
 
 # Documentation Tools
 sphinx-book-theme

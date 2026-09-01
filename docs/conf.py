@@ -37,7 +37,7 @@ autosummary_generate = True # Auto-generates individual API doc pages from summa
 templates_path = ['_templates']
 exclude_patterns = []
 
-language = 'English'
+language = 'en'
 
 # -- BibTeX citation settings
 bibtex_bibfiles = ['references.bib']
@@ -64,13 +64,13 @@ nbsphinx_prolog = """
 #import sphinx_book_theme
 
 html_theme = 'sphinx_book_theme'
+
+pygments_style = 'sphinx'       
+
 html_static_path = ['_static']
 
 # Path to the logo relative to the configuration directory
 html_logo = "_static/logo.png"
-
-# Ensure the static path is included so Sphinx finds the file
-html_static_path = ['_static']
 
 # Link custom CSS (logo sizing and styling, located in '_static')
 html_css_files = [
